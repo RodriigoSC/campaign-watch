@@ -19,6 +19,14 @@
 
   <ItemGroup>
     <Folder Include="Dtos\Read\Effmail\" />
+    <Folder Include="Dtos\Read\Effsms\" />
+    <Folder Include="Dtos\Read\Effpush\" />
+    <Folder Include="Mappers\Read\Effmail\" />
+    <Folder Include="Mappers\Read\Effpush\" />
+    <Folder Include="Mappers\Read\Effsms\" />
+    <Folder Include="Services\Read\Effmail\" />
+    <Folder Include="Services\Read\Effpush\" />
+    <Folder Include="Services\Read\Effsms\" />
   </ItemGroup>
 
 </Project>

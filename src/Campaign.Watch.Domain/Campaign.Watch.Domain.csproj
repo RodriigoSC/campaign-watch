@@ -8,4 +8,11 @@
     <PackageReference Include="MongoDB.Bson" Version="3.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entities\Read\Effsms\" />
+    <Folder Include="Entities\Read\Effpush\" />
+    <Folder Include="Interfaces\Services\Read\Effpush\" />
+    <Folder Include="Interfaces\Services\Read\Effsms\" />
+  </ItemGroup>
+
 </Project>

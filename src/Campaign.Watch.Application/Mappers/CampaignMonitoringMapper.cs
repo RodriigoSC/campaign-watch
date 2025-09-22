@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Campaign.Watch.Application.Dtos;
+using Campaign.Watch.Application.Dtos.Campaign;
 using Campaign.Watch.Application.Dtos.Read.Campaign;
-using Campaign.Watch.Domain.Entities;
+using Campaign.Watch.Domain.Entities.Campaign;
 using Campaign.Watch.Domain.Enums;
 
 namespace Campaign.Watch.Application.Mappers

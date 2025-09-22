@@ -1,5 +1,5 @@
-﻿using Campaign.Watch.Domain.Entities.Read;
-using Campaign.Watch.Domain.Interfaces.Services.Read;
+﻿using Campaign.Watch.Domain.Entities.Read.Effmail;
+using Campaign.Watch.Domain.Interfaces.Services.Read.Effmail;
 using Campaign.Watch.Infra.Effmail.Factories;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace Campaign.Watch.Infra.Effmail.Services
             _factory = factory;
         }
 
-        public Task<IEnumerable<EffmailReadOnly>> GetTriggerEffmail(string dbName, string workflowId)
+        public Task<IEnumerable<EffmailRead>> GetTriggerEffmail(string dbName, string workflowId)
         {
             throw new NotImplementedException();
         }

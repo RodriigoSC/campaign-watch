@@ -1,4 +1,4 @@
-﻿using Campaign.Watch.Domain.Interfaces.Services.Read;
+﻿using Campaign.Watch.Domain.Interfaces.Services.Read.Effmail;
 using Campaign.Watch.Infra.Effmail.Services;
 using Microsoft.Extensions.DependencyInjection;
 

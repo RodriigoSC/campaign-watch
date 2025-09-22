@@ -1,6 +1,14 @@
-﻿using Campaign.Watch.Application.Interfaces;
-using Campaign.Watch.Application.Mappers;
-using Campaign.Watch.Application.Services;
+﻿using Campaign.Watch.Application.Interfaces.Campaign;
+using Campaign.Watch.Application.Interfaces.Client;
+using Campaign.Watch.Application.Interfaces.Read;
+using Campaign.Watch.Application.Interfaces.Worker;
+using Campaign.Watch.Application.Mappers.Campaign;
+using Campaign.Watch.Application.Mappers.Client;
+using Campaign.Watch.Application.Mappers.Read.Campaign;
+using Campaign.Watch.Application.Services.Campaign;
+using Campaign.Watch.Application.Services.Client;
+using Campaign.Watch.Application.Services.Read.Campaign;
+using Campaign.Watch.Application.Services.Worker;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Campaign.Watch.Application.Resolver
