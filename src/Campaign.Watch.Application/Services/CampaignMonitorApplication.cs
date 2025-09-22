@@ -20,7 +20,7 @@ namespace Campaign.Watch.Application.Services
         }
 
 
-        #region Banco de origem (monitoramento)
+        #region Banco de origem Campaign (monitoramento)
 
         public async Task<IEnumerable<CampaignReadDto>> GetSourceCampaignsByClientAsync(string dbName)
         {

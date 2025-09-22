@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Campaign.Watch.Domain.Entities.Read
 {
+    [BsonIgnoreExtraElements]
     public class ExecutionReadModel
     {
         [JsonPropertyName("_id")]
@@ -50,7 +52,7 @@ namespace Campaign.Watch.Domain.Entities.Read
         public List<WorkflowExecutionReadModel> WorkflowExecution { get; set; }
     }
 
-
+    [BsonIgnoreExtraElements]
     public class WorkflowExecutionReadModel
     {
         [JsonPropertyName("_id")]

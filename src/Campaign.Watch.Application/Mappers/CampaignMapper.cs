@@ -32,11 +32,16 @@ namespace Campaign.Watch.Application.Mappers
             CreateMap<SmsIntegrationData, SmsIntegrationDataDto>().ReverseMap();
             CreateMap<PushIntegrationData, PushIntegrationDataDto>().ReverseMap();
 
-            // Mapeamento do DTO para a Entidade de Domínio
+            // Mapeamento do DTO para a Entidade de Domínio            
             CreateMap<CampaignDto, CampaignEntity>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignora o Id para não dar erro na criação
-                .ForMember(dest => dest.StatusCampaign, opt => opt.MapFrom(src => Enum.Parse<CampaignStatus>(src.StatusCampaign, true)))
-                .ForMember(dest => dest.TypeCampaign, opt => opt.MapFrom(src => Enum.Parse<TypeCampaign>(src.TypeCampaign, true)));
+            .ForMember(
+                dest => dest.Id,
+                opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.Id) ? MongoDB.Bson.ObjectId.Parse(src.Id) : MongoDB.Bson.ObjectId.Empty)
+            )
+            .ForMember(dest => dest.TypeCampaign, opt => opt.MapFrom(src =>
+                !string.IsNullOrEmpty(src.TypeCampaign) && Enum.IsDefined(typeof(TypeCampaign), src.TypeCampaign)
+                    ? Enum.Parse<TypeCampaign>(src.TypeCampaign, true)
+                    : default(TypeCampaign)));
         }
     }
 }

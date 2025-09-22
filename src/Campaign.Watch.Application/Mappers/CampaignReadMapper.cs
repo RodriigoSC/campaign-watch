@@ -36,7 +36,6 @@ namespace Campaign.Watch.Application.Mappers
 
             // Mapeamento que estava faltando para o objeto aninhado
             CreateMap<SchedulerReadDto, SchedulerDto>();
-
         }
     }
 }

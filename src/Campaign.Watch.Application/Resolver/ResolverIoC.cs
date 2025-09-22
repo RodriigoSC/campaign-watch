@@ -21,8 +21,7 @@ namespace Campaign.Watch.Application.Resolver
             services.AddAutoMapper(typeof(CampaignMapper));
 
             services.AddAutoMapper(typeof(CampaignReadMapper));
-
-
+            services.AddAutoMapper(typeof(ExecutionReadMapper));
 
             return services;
         }
