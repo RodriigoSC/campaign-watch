@@ -18,6 +18,7 @@ namespace Campaign.Watch.Application.Interfaces
         Task<IEnumerable<CampaignDto>> GetAllCampaignsByClientAsync(string clientName);
         Task<IEnumerable<CampaignDto>> GetCampaignsByStatusAsync(CampaignStatus status);
         Task<IEnumerable<CampaignDto>> GetCampaignsPaginatedAsync(int page, int pageSize);
+        Task<CampaignDto> GetCampaignByIdCampaignAsync(string idCampaign);
 
         #endregion
     }

@@ -6,6 +6,6 @@ namespace Campaign.Watch.Application.Interfaces
     public interface ICampaignMonitorFlow
     {
         Task MonitorCampaignsAsync();
-        Task ValidateCampaignAsync(CampaignDto campaignDto);
+        //Task ValidateCampaignAsync(CampaignDto campaignDto);
     }
 }

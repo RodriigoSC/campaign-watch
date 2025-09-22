@@ -10,7 +10,7 @@ namespace Campaign.Watch.Domain.Entities
     {
         public string ClientName { get; set; }
         public string IdCampaign { get; set; }
-        public int NumberId { get; set; }
+        public long NumberId { get; set; }
         public string Name { get; set; }
         public TypeCampaign TypeCampaign { get; set; }
         public string Description { get; set; }
@@ -19,6 +19,9 @@ namespace Campaign.Watch.Domain.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime ModifiedAt { get; set; }
         public CampaignStatus StatusCampaign { get; set; }
+        public MonitoringStatus MonitoringStatus { get; set; }
+        public DateTime? NextExecutionMonitoring { get; set; }
+        public DateTime? LastCheckMonitoring { get; set; }
         public bool IsDeleted { get; set; }
         public bool IsRestored { get; set; }
         public Scheduler Scheduler { get; set; }

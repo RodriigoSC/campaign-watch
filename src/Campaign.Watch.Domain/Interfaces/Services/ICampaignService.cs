@@ -18,6 +18,7 @@ namespace Campaign.Watch.Domain.Interfaces.Services
         Task<CampaignEntity> GetCampaignByIdAsync(ObjectId id);
         Task<CampaignEntity> GetCampaignByNameAsync(string campaignName);
         Task<CampaignEntity> GetCampaignByNumberAsync(long campaignNumber);
+        Task<CampaignEntity> GetCampaignByIdCampaignAsync(string idCampaign);
         Task<IEnumerable<CampaignEntity>> GetActiveCampaignsAsync();
         Task<IEnumerable<CampaignEntity>> GetCampaignsByStatusAsync(CampaignStatus statusCampaign);
         Task<IEnumerable<CampaignEntity>> GetCampaignsPaginatedAsync(int page, int pageSize);

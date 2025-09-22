@@ -99,5 +99,10 @@ namespace Campaign.Watch.Infra.Data.Repository
         {
             return await _collection.Find(c => c.NumberId == campaignNumber).FirstOrDefaultAsync();
         }
+
+        public async Task<CampaignEntity> GetCampaignByIdCampaignAsync(string idCampaign)
+        {
+            return await _collection.Find(c => c.IdCampaign == idCampaign).FirstOrDefaultAsync();
+        }
     }
 }

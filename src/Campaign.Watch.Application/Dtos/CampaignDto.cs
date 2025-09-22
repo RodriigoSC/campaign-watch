@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Campaign.Watch.Domain.Enums;
+using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Campaign.Watch.Application.Dtos
 {
@@ -9,7 +9,7 @@ namespace Campaign.Watch.Application.Dtos
         public string Id { get; set; }
         public string ClientName { get; set; }
         public string IdCampaign { get; set; }
-        public int NumberId { get; set; }
+        public long NumberId { get; set; }
         public string Name { get; set; }
         public string TypeCampaign { get; set; }
         public string Description { get; set; }
@@ -17,7 +17,10 @@ namespace Campaign.Watch.Application.Dtos
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime ModifiedAt { get; set; }
-        public string StatusCampaign { get; set; }
+        public CampaignStatus StatusCampaign { get; set; }
+        public MonitoringStatus MonitoringStatus { get; set; }
+        public DateTime? NextExecutionMonitoring { get; set; }
+        public DateTime? LastCheckMonitoring { get; set; }
         public SchedulerDto Scheduler { get; set; }
         public List<ExecutionDto> Executions { get; set; }
     }

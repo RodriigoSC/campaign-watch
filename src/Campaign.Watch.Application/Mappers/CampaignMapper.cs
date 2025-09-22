@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Campaign.Watch.Application.Dtos;
 using Campaign.Watch.Domain.Entities;
+using Campaign.Watch.Domain.Enums;
+using System;
 
 namespace Campaign.Watch.Application.Mappers
 {
@@ -14,23 +16,27 @@ namespace Campaign.Watch.Application.Mappers
                 .ForMember(dest => dest.StatusCampaign, opt => opt.MapFrom(src => src.StatusCampaign.ToString()))
                 .ForMember(dest => dest.TypeCampaign, opt => opt.MapFrom(src => src.TypeCampaign.ToString()));
 
-            // Mapeamentos simples
-            CreateMap<Scheduler, SchedulerDto>();
-            CreateMap<Execution, ExecutionDto>();
-            CreateMap<Workflows, WorkflowDto>();
-            CreateMap<FileInfoData, FileInfoDataDto>();
-            CreateMap<LeadsData, LeadsDataDto>();
+            CreateMap<Scheduler, SchedulerDto>().ReverseMap();
+            CreateMap<Execution, ExecutionDto>().ReverseMap();
+            CreateMap<Workflows, WorkflowDto>().ReverseMap();
+            CreateMap<FileInfoData, FileInfoDataDto>().ReverseMap();
+            CreateMap<LeadsData, LeadsDataDto>().ReverseMap();
 
-            // Mapeamento polimórfico direto entre a entidade base e o DTO base
             CreateMap<IntegrationDataBase, IntegrationDataDtoBase>()
                 .Include<EmailIntegrationData, EmailIntegrationDataDto>()
                 .Include<SmsIntegrationData, SmsIntegrationDataDto>()
-                .Include<PushIntegrationData, PushIntegrationDataDto>();
+                .Include<PushIntegrationData, PushIntegrationDataDto>()
+                .ReverseMap();
 
-            // Mapeamentos diretos para cada tipo concreto
-            CreateMap<EmailIntegrationData, EmailIntegrationDataDto>();
-            CreateMap<SmsIntegrationData, SmsIntegrationDataDto>();
-            CreateMap<PushIntegrationData, PushIntegrationDataDto>();
+            CreateMap<EmailIntegrationData, EmailIntegrationDataDto>().ReverseMap();
+            CreateMap<SmsIntegrationData, SmsIntegrationDataDto>().ReverseMap();
+            CreateMap<PushIntegrationData, PushIntegrationDataDto>().ReverseMap();
+
+            // Mapeamento do DTO para a Entidade de Domínio
+            CreateMap<CampaignDto, CampaignEntity>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignora o Id para não dar erro na criação
+                .ForMember(dest => dest.StatusCampaign, opt => opt.MapFrom(src => Enum.Parse<CampaignStatus>(src.StatusCampaign, true)))
+                .ForMember(dest => dest.TypeCampaign, opt => opt.MapFrom(src => Enum.Parse<TypeCampaign>(src.TypeCampaign, true)));
         }
     }
 }

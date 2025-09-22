@@ -26,7 +26,7 @@ namespace Campaign.Watch.Worker.Channels
             {
                 await _campaignMonitorFlow.MonitorCampaignsAsync();
 
-                await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
     }

@@ -101,5 +101,10 @@ namespace Campaign.Watch.Infra.Data.Services
         {
             return await _campaignRepository.CountCampaignsByClientAsync(clientName);
         }
+
+        public async Task<CampaignEntity> GetCampaignByIdCampaignAsync(string idCampaign)
+        {
+            return await _campaignRepository.GetCampaignByIdCampaignAsync(idCampaign);
+        }
     }
 }
