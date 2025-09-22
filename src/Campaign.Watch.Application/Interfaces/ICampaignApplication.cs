@@ -9,8 +9,8 @@ namespace Campaign.Watch.Application.Interfaces
     {
         #region Banco de persistência (CRUD)
 
-        Task<CampaignDto> CreateCampaignAsync(CampaignDto dto);
-        Task<bool> UpdateCampaignAsync(string id, CampaignDto dto);
+        Task<CampaignMonitoringDto> CreateCampaignAsync(CampaignDto dto);
+        Task<bool> UpdateCampaignAsync(string id, CampaignMonitoringDto dto);
         Task<IEnumerable<CampaignDto>> GetAllCampaignsAsync();
         Task<CampaignDto> GetCampaignByIdAsync(string id);
         Task<CampaignDto> GetCampaignByNameAsync(string campaignName);
@@ -18,7 +18,7 @@ namespace Campaign.Watch.Application.Interfaces
         Task<IEnumerable<CampaignDto>> GetAllCampaignsByClientAsync(string clientName);
         Task<IEnumerable<CampaignDto>> GetCampaignsByStatusAsync(CampaignStatus status);
         Task<IEnumerable<CampaignDto>> GetCampaignsPaginatedAsync(int page, int pageSize);
-        Task<CampaignDto> GetCampaignByIdCampaignAsync(string idCampaign);
+        Task<CampaignMonitoringDto> GetCampaignByIdCampaignAsync(string idCampaign);
 
         #endregion
     }

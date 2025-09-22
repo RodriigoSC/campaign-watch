@@ -126,12 +126,17 @@ namespace Campaign.Watch.Application.Services
 
         private async Task ProcessarCampanhaUnicaAsync(ClientDto client, CampaignReadDto campaignSource)
         {
-            _logger.LogDebug("Mapeando e enriquecendo dados da campanha.");
-            var campanhaDto = _mapper.Map<CampaignDto>(campaignSource);
-            campanhaDto.ClientName = client.Name;
+            _logger.LogDebug("Iniciando processamento da campanha {CampaignId}", campaignSource.Id);
 
-            await EnriquecerCampanhaComExecucoesAsync(client, campanhaDto);
-            await ValidarEProcessarCampanhaAsync(campanhaDto);
+            // 1. Mapear dados de leitura para DTO de monitoramento
+            var campanhaMonitoring = _mapper.Map<CampaignMonitoringDto>(campaignSource);
+            campanhaMonitoring.ClientName = client.Name;
+
+            // 2. Enriquecer com execuções
+            await EnriquecerCampanhaComExecucoesAsync(client, campanhaMonitoring);
+
+            // 3. Processar e persistir
+            await ValidarEProcessarCampanhaAsync(campanhaMonitoring);
         }
 
         private async Task EnriquecerCampanhaComExecucoesAsync(ClientDto client, CampaignDto campaign)
