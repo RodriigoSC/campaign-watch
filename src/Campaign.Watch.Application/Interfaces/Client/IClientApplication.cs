@@ -6,11 +6,11 @@ namespace Campaign.Watch.Application.Interfaces.Client
 {
     public interface IClientApplication
     {
-        Task<ClientDto> CreateClientAsync(ClientInputDto clientDto);
-        Task<IEnumerable<ClientDto>> GetAllClientsAsync();
-        Task<ClientDto> GetClientByIdAsync(string id);
-        Task<ClientDto> GetClientByNameAsync(string clientName);
-        Task<bool> UpdateClientAsync(string id, ClientInputDto clientDto);
+        Task<ClientResponse> CreateClientAsync(SaveClientRequest clientDto);
+        Task<IEnumerable<ClientResponse>> GetAllClientsAsync();
+        Task<ClientResponse> GetClientByIdAsync(string id);
+        Task<ClientResponse> GetClientByNameAsync(string clientName);
+        Task<bool> UpdateClientAsync(string id, SaveClientRequest clientDto);
         Task<bool> DeleteClientAsync(string id);
     }
 }

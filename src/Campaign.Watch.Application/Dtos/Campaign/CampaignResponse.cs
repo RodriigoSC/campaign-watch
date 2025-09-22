@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Campaign.Watch.Application.Dtos.Campaign
 {
-    public class CampaignDto
+    public class CampaignResponse
     {
         public string Id { get; set; }
         public string ClientName { get; set; }
@@ -21,11 +21,11 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public MonitoringStatus MonitoringStatus { get; set; }
         public DateTime? NextExecutionMonitoring { get; set; }
         public DateTime? LastCheckMonitoring { get; set; }
-        public SchedulerDto Scheduler { get; set; }
-        public List<ExecutionDto> Executions { get; set; }
+        public SchedulerResponse Scheduler { get; set; }
+        public List<ExecutionResponse> Executions { get; set; }
     }
 
-    public class SchedulerDto
+    public class SchedulerResponse
     {
         public DateTime StartDateTime { get; set; }
         public DateTime? EndDateTime { get; set; }
@@ -33,17 +33,17 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public string Crontab { get; set; }
     }
 
-    public class ExecutionDto
+    public class ExecutionResponse
     {
         public string ExecutionId { get; set; }
         public string CampaignName { get; set; }
         public string Status { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public List<WorkflowDto> Steps { get; set; }
+        public List<WorkflowResponse> Steps { get; set; }
     }
 
-    public class WorkflowDto
+    public class WorkflowResponse
     {
         public string Name { get; set; }
         public string Type { get; set; }
@@ -51,22 +51,22 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public long TotalUser { get; set; }
         public long TotalExecutionTime { get; set; }
         public object Error { get; set; }
-        public IntegrationDataDtoBase IntegrationData { get; set; }
+        public IntegrationDataResponseBase IntegrationData { get; set; }
     }
-    public abstract class IntegrationDataDtoBase
+    public abstract class IntegrationDataResponseBase
     {
         public string ChannelName { get; set; }
         public string IntegrationStatus { get; set; }
     }
 
-    public class EmailIntegrationDataDto : IntegrationDataDtoBase
+    public class EmailIntegrationDataResponse : IntegrationDataResponseBase
     {
         public string TemplateId { get; set; }
-        public FileInfoDataDto File { get; set; }
-        public LeadsDataDto Leads { get; set; }
+        public FileInfoDataResponse File { get; set; }
+        public LeadsDataResponse Leads { get; set; }
     }
 
-    public class SmsIntegrationDataDto : IntegrationDataDtoBase
+    public class SmsIntegrationDataResponse : IntegrationDataResponseBase
     {
         public string MessageTemplate { get; set; }
         public int SentCount { get; set; }
@@ -74,13 +74,13 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public int SuccessCount { get; set; }
     }
 
-    public class PushIntegrationDataDto : IntegrationDataDtoBase
+    public class PushIntegrationDataResponse : IntegrationDataResponseBase
     {
         public string MessageTemplate { get; set; }
         public int SentDelivered { get; set; }
     }
 
-    public class FileInfoDataDto
+    public class FileInfoDataResponse
     {
         public string Name { get; set; }
         public DateTime? StartedAt { get; set; }
@@ -88,7 +88,7 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public long Total { get; set; }
     }
 
-    public class LeadsDataDto
+    public class LeadsDataResponse
     {
         public int? Blocked { get; set; }
         public int? Deduplication { get; set; }

@@ -23,14 +23,14 @@ namespace Campaign.Watch.Application.Services.Campaign
 
         #region Banco de persistência (CRUD)
 
-        public async Task<CampaignDto> CreateCampaignAsync(CampaignDto dto)
+        public async Task<CampaignResponse> CreateCampaignAsync(CampaignResponse dto)
         {
             var entity = _mapper.Map<CampaignEntity>(dto);
             var created = await _campaignService.CreateCampaignAsync(entity);
-            return _mapper.Map<CampaignDto>(created);
+            return _mapper.Map<CampaignResponse>(created);
         }
 
-        public async Task<bool> UpdateCampaignAsync(string id, CampaignDto dto)
+        public async Task<bool> UpdateCampaignAsync(string id, CampaignResponse dto)
         {
             if (!ObjectId.TryParse(id, out var objectId))
                 return false;
@@ -39,56 +39,56 @@ namespace Campaign.Watch.Application.Services.Campaign
             return await _campaignService.UpdateCampaignAsync(objectId, entity);
         }
 
-        public async Task<IEnumerable<CampaignDto>> GetAllCampaignsAsync()
+        public async Task<IEnumerable<CampaignResponse>> GetAllCampaignsAsync()
         {
             var campaigns = await _campaignService.GetAllCampaignsAsync();
-            return _mapper.Map<IEnumerable<CampaignDto>>(campaigns);
+            return _mapper.Map<IEnumerable<CampaignResponse>>(campaigns);
         }
 
-        public async Task<CampaignDto> GetCampaignByIdAsync(string id)
+        public async Task<CampaignResponse> GetCampaignByIdAsync(string id)
         {
             if (!ObjectId.TryParse(id, out var objectId))
             {
                 return null;
             }
             var campaign = await _campaignService.GetCampaignByIdAsync(objectId);
-            return _mapper.Map<CampaignDto>(campaign);
+            return _mapper.Map<CampaignResponse>(campaign);
         }
 
-        public async Task<CampaignDto> GetCampaignByNameAsync(string campaignName)
+        public async Task<CampaignResponse> GetCampaignByNameAsync(string campaignName)
         {
             var campaign = await _campaignService.GetCampaignByNameAsync(campaignName);
-            return _mapper.Map<CampaignDto>(campaign);
+            return _mapper.Map<CampaignResponse>(campaign);
         }
 
-        public async Task<CampaignDto> GetCampaignByNumberAsync(long campaignNumber)
+        public async Task<CampaignResponse> GetCampaignByNumberAsync(long campaignNumber)
         {
             var campaign = await _campaignService.GetCampaignByNumberAsync(campaignNumber);
-            return _mapper.Map<CampaignDto>(campaign);
+            return _mapper.Map<CampaignResponse>(campaign);
         }
 
-        public async Task<IEnumerable<CampaignDto>> GetAllCampaignsByClientAsync(string clientName)
+        public async Task<IEnumerable<CampaignResponse>> GetAllCampaignsByClientAsync(string clientName)
         {
             var campaigns = await _campaignService.GetAllCampaignsByClientAsync(clientName);
-            return _mapper.Map<IEnumerable<CampaignDto>>(campaigns);
+            return _mapper.Map<IEnumerable<CampaignResponse>>(campaigns);
         }
 
-        public async Task<IEnumerable<CampaignDto>> GetCampaignsByStatusAsync(CampaignStatus status)
+        public async Task<IEnumerable<CampaignResponse>> GetCampaignsByStatusAsync(CampaignStatus status)
         {
             var campaigns = await _campaignService.GetCampaignsByStatusAsync(status);
-            return _mapper.Map<IEnumerable<CampaignDto>>(campaigns);
+            return _mapper.Map<IEnumerable<CampaignResponse>>(campaigns);
         }
 
-        public async Task<IEnumerable<CampaignDto>> GetCampaignsPaginatedAsync(int page, int pageSize)
+        public async Task<IEnumerable<CampaignResponse>> GetCampaignsPaginatedAsync(int page, int pageSize)
         {
             var campaigns = await _campaignService.GetCampaignsPaginatedAsync(page, pageSize);
-            return _mapper.Map<IEnumerable<CampaignDto>>(campaigns);
+            return _mapper.Map<IEnumerable<CampaignResponse>>(campaigns);
         }
 
-        public async Task<CampaignDto> GetCampaignByIdCampaignAsync(string idCampaign)
+        public async Task<CampaignResponse> GetCampaignByIdCampaignAsync(string idCampaign)
         {
             var campaign = await _campaignService.GetCampaignByIdCampaignAsync(idCampaign);
-            return _mapper.Map<CampaignDto>(campaign);
+            return _mapper.Map<CampaignResponse>(campaign);
         }
 
         #endregion

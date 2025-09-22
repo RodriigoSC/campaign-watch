@@ -10,13 +10,12 @@ namespace Campaign.Watch.Application.Mappers.Client
     {
         public ClientMapper()
         {
-            // Mapeamento da Entrada (DTO) para a Entidade de Domínio
-            CreateMap<ClientInputDto, ClientEntity>();
-            CreateMap<CampaignConfigInputDto, CampaignConfig>();
-            CreateMap<EffectiveChannelInputDto, EffectiveChannel>()
+            // Mapeamento da Entrada (Request) para a Entidade de Domínio
+            CreateMap<SaveClientRequest, ClientEntity>();
+            CreateMap<CampaignConfigDto, CampaignConfig>();
+            CreateMap<EffectiveChannelDto, EffectiveChannel>()
                 .ConvertUsing((src, dest, context) =>
                 {
-                    // Com base no enum do DTO, decidimos qual objeto concreto criar
                     switch (src.TypeChannel)
                     {
                         case TypeChannels.EffectiveMail:
@@ -36,16 +35,16 @@ namespace Campaign.Watch.Application.Mappers.Client
                     }
                 });
 
-            CreateMap<EffectiveChannelInputDto, EffectiveMail>();
-            CreateMap<EffectiveChannelInputDto, EffectiveSms>();
-            CreateMap<EffectiveChannelInputDto, EffectivePush>();
-            CreateMap<EffectiveChannelInputDto, EffectivePages>();
-            CreateMap<EffectiveChannelInputDto, EffectiveSocial>();
-            CreateMap<EffectiveChannelInputDto, EffectiveWhastApp>();
+            CreateMap<EffectiveChannelDto, EffectiveMail>();
+            CreateMap<EffectiveChannelDto, EffectiveSms>();
+            CreateMap<EffectiveChannelDto, EffectivePush>();
+            CreateMap<EffectiveChannelDto, EffectivePages>();
+            CreateMap<EffectiveChannelDto, EffectiveSocial>();
+            CreateMap<EffectiveChannelDto, EffectiveWhastApp>();
 
 
-            // Mapeamento da Entidade de Domínio para a Saída (DTO)
-            CreateMap<ClientEntity, ClientDto>();
+            // Mapeamento da Entidade de Domínio para a Saída (Response)
+            CreateMap<ClientEntity, ClientResponse>();
             CreateMap<CampaignConfig, CampaignConfigDto>();
             CreateMap<EffectiveChannel, EffectiveChannelDto>();
 

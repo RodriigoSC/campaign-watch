@@ -1,10 +1,9 @@
 ﻿using Campaign.Watch.Application.Interfaces.Campaign;
 using Campaign.Watch.Application.Interfaces.Client;
-using Campaign.Watch.Application.Interfaces.Read;
+using Campaign.Watch.Application.Interfaces.Read.Campaign;
 using Campaign.Watch.Application.Interfaces.Worker;
 using Campaign.Watch.Application.Mappers.Campaign;
 using Campaign.Watch.Application.Mappers.Client;
-using Campaign.Watch.Application.Mappers.Read.Campaign;
 using Campaign.Watch.Application.Services.Campaign;
 using Campaign.Watch.Application.Services.Client;
 using Campaign.Watch.Application.Services.Read.Campaign;
@@ -23,13 +22,8 @@ namespace Campaign.Watch.Application.Resolver
             services.AddTransient<ICampaignMonitorApplication, CampaignMonitorApplication>();
             services.AddTransient<ICampaignMonitorFlow, CampaignMonitorFlow>();
 
-
-
             services.AddAutoMapper(typeof(ClientMapper));
             services.AddAutoMapper(typeof(CampaignMapper));
-
-            services.AddAutoMapper(typeof(CampaignReadMapper));
-            services.AddAutoMapper(typeof(ExecutionReadMapper));
 
             return services;
         }

@@ -9,16 +9,16 @@ namespace Campaign.Watch.Application.Interfaces.Campaign
     {
         #region Banco de persistência (CRUD)
 
-        Task<CampaignDto> CreateCampaignAsync(CampaignDto dto);
-        Task<bool> UpdateCampaignAsync(string id, CampaignDto dto);
-        Task<IEnumerable<CampaignDto>> GetAllCampaignsAsync();
-        Task<CampaignDto> GetCampaignByIdAsync(string id);
-        Task<CampaignDto> GetCampaignByNameAsync(string campaignName);
-        Task<CampaignDto> GetCampaignByNumberAsync(long campaignNumber);
-        Task<IEnumerable<CampaignDto>> GetAllCampaignsByClientAsync(string clientName);
-        Task<IEnumerable<CampaignDto>> GetCampaignsByStatusAsync(CampaignStatus status);
-        Task<IEnumerable<CampaignDto>> GetCampaignsPaginatedAsync(int page, int pageSize);
-        Task<CampaignDto> GetCampaignByIdCampaignAsync(string idCampaign);
+        Task<CampaignResponse> CreateCampaignAsync(CampaignResponse dto);
+        Task<bool> UpdateCampaignAsync(string id, CampaignResponse dto);
+        Task<IEnumerable<CampaignResponse>> GetAllCampaignsAsync();
+        Task<CampaignResponse> GetCampaignByIdAsync(string id);
+        Task<CampaignResponse> GetCampaignByNameAsync(string campaignName);
+        Task<CampaignResponse> GetCampaignByNumberAsync(long campaignNumber);
+        Task<IEnumerable<CampaignResponse>> GetAllCampaignsByClientAsync(string clientName);
+        Task<IEnumerable<CampaignResponse>> GetCampaignsByStatusAsync(CampaignStatus status);
+        Task<IEnumerable<CampaignResponse>> GetCampaignsPaginatedAsync(int page, int pageSize);
+        Task<CampaignResponse> GetCampaignByIdCampaignAsync(string idCampaign);
 
         #endregion
     }

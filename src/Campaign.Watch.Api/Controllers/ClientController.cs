@@ -34,10 +34,10 @@ namespace Campaign.Watch.Api.Controllers
         /// <response code="400">Se os dados fornecidos forem inválidos ou se já existir um cliente com o mesmo nome.</response>
         /// <response code="500">Se ocorrer um erro inesperado no servidor.</response>
         [HttpPost]
-        [ProducesResponseType(typeof(ClientDto), 201)]
+        [ProducesResponseType(typeof(ClientResponse), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateClient([FromBody] ClientInputDto clientDto)
+        public async Task<IActionResult> CreateClient([FromBody] SaveClientRequest clientDto)
         {
             if (!ModelState.IsValid)
             {
@@ -65,7 +65,7 @@ namespace Campaign.Watch.Api.Controllers
         /// <returns>Uma lista de clientes.</returns>
         /// <response code="200">Retorna a lista de clientes.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<ClientDto>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<ClientResponse>), 200)]
         public async Task<IActionResult> GetAllClients()
         {
             var clients = await _clientApplication.GetAllClientsAsync();
@@ -80,7 +80,7 @@ namespace Campaign.Watch.Api.Controllers
         /// <response code="200">Retorna os dados do cliente encontrado.</response>
         /// <response code="404">Se o cliente não for encontrado.</response>
         [HttpGet("{id}", Name = "GetClientById")]
-        [ProducesResponseType(typeof(ClientDto), 200)]
+        [ProducesResponseType(typeof(ClientResponse), 200)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetClientById(string id)
         {
@@ -100,7 +100,7 @@ namespace Campaign.Watch.Api.Controllers
         /// <response code="200">Retorna os dados do cliente encontrado.</response>
         /// <response code="404">Se o cliente não for encontrado.</response>
         [HttpGet("by-name/{clientName}")]
-        [ProducesResponseType(typeof(ClientDto), 200)]
+        [ProducesResponseType(typeof(ClientResponse), 200)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetClientByName(string clientName)
         {
@@ -125,7 +125,7 @@ namespace Campaign.Watch.Api.Controllers
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> UpdateClient(string id, [FromBody] ClientInputDto clientDto)
+        public async Task<IActionResult> UpdateClient(string id, [FromBody] SaveClientRequest clientDto)
         {
             if (!ModelState.IsValid)
             {

@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using Campaign.Watch.Application.Dtos.Campaign;
 using Campaign.Watch.Application.Dtos.Client;
-using Campaign.Watch.Application.Dtos.Read.Campaign;
 using Campaign.Watch.Application.Helpers;
 using Campaign.Watch.Application.Interfaces.Campaign;
 using Campaign.Watch.Application.Interfaces.Client;
-using Campaign.Watch.Application.Interfaces.Read;
+using Campaign.Watch.Application.Interfaces.Read.Campaign;
 using Campaign.Watch.Application.Interfaces.Worker;
+using Campaign.Watch.Domain.Entities.Campaign;
+using Campaign.Watch.Domain.Entities.Read.Campaign;
 using Campaign.Watch.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using System;
@@ -24,10 +25,7 @@ namespace Campaign.Watch.Application.Services.Worker
         private readonly ILogger<CampaignMonitorFlow> _logger;
         private readonly IMapper _mapper;
 
-        public CampaignMonitorFlow(
-            IClientApplication clientApplication,
-            ICampaignMonitorApplication campaignMonitorApplication,
-            ICampaignApplication campaignApplication,
+        public CampaignMonitorFlow(IClientApplication clientApplication,ICampaignMonitorApplication campaignMonitorApplication,ICampaignApplication campaignApplication,
             IMapper mapper,
             ILogger<CampaignMonitorFlow> logger)
         {
@@ -46,7 +44,7 @@ namespace Campaign.Watch.Application.Services.Worker
 
             try
             {
-                var clientes = await _clientApplication.GetAllClientsAsync() ?? Enumerable.Empty<ClientDto>();
+                var clientes = await _clientApplication.GetAllClientsAsync() ?? Enumerable.Empty<ClientResponse>();
                 var clientesAtivos = clientes.Where(c => c.IsActive).ToList();
 
                 _logger.LogInformation("Foram encontrados {TotalClientesAtivos} clientes ativos para monitoramento.", clientesAtivos.Count);
@@ -79,7 +77,7 @@ namespace Campaign.Watch.Application.Services.Worker
                 campanhasProcessadas, totalErros);
         }
 
-        private async Task<int> ProcessarCampanhasDoClienteAsync(ClientDto client)
+        private async Task<int> ProcessarCampanhasDoClienteAsync(ClientResponse client)
         {
             if (client.CampaignConfig?.Database == null)
             {
@@ -87,7 +85,7 @@ namespace Campaign.Watch.Application.Services.Worker
                 return 0;
             }
 
-            _logger.LogInformation("Processando campanhas do cliente {cliente}.",client.Name);
+            _logger.LogInformation("Processando campanhas do cliente {cliente}.", client.Name);
 
             var campanhasOrigem = await BuscarCampanhasDaOrigemAsync(client);
             if (!campanhasOrigem.Any())
@@ -122,132 +120,65 @@ namespace Campaign.Watch.Application.Services.Worker
             return processadas;
         }
 
-        private async Task<IEnumerable<CampaignReadDto>> BuscarCampanhasDaOrigemAsync(ClientDto client)
+        private async Task<IEnumerable<CampaignRead>> BuscarCampanhasDaOrigemAsync(ClientResponse client)
         {
             try
             {
                 return await _campaignMonitorApplication.GetSourceCampaignsByClientAsync(client.CampaignConfig.Database)
-                       ?? Enumerable.Empty<CampaignReadDto>();
+                       ?? Enumerable.Empty<CampaignRead>();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao buscar campanhas da origem: {DatabaseName}", client.CampaignConfig.Database);
-                return Enumerable.Empty<CampaignReadDto>();
+                return Enumerable.Empty<CampaignRead>();
             }
         }
 
-        private async Task ProcessarCampanhaUnicaAsync(ClientDto client, CampaignReadDto campaignSource)
+        private async Task ProcessarCampanhaUnicaAsync(ClientResponse client, CampaignRead campaignSource)
         {
             _logger.LogDebug("Iniciando processamento da campanha.");
 
-            // 1. Converter para DTO de monitoramento
-            var campanhaMonitoring = _mapper.Map<CampaignMonitoringDto>(campaignSource);
-            campanhaMonitoring.ClientName = client.Name;
+            var campaignToMonitor = _mapper.Map<CampaignEntity>(campaignSource);
+            campaignToMonitor.ClientName = client.Name;
 
-            // 2. Enriquecer com execuções e análise detalhada
-            await EnriquecerCampanhaComDadosComplementaresAsync(client, campanhaMonitoring);
+            await EnriquecerCampanhaComExecucoesAsync(client, campaignToMonitor);
 
-            // 3. Determinar tipo de campanha (pontual vs recorrente)
-            var tipoCampanha = DeterminarTipoCampanha(campanhaMonitoring);
+            var tipoCampanha = DeterminarTipoCampanha(campaignToMonitor);
             _logger.LogDebug("Tipo identificado: {TipoCampanha}", tipoCampanha);
 
-            // 4. Processar baseado no tipo
-            await ValidarEProcessarCampanhaAsync(campanhaMonitoring, tipoCampanha);
+            await ValidarEProcessarCampanhaAsync(campaignToMonitor, tipoCampanha);
         }
 
-        private async Task EnriquecerCampanhaComDadosComplementaresAsync(ClientDto client, CampaignMonitoringDto campaign)
+        private async Task EnriquecerCampanhaComExecucoesAsync(ClientResponse client, CampaignEntity campaign)
         {
             try
             {
-                // Buscar execuções
                 var execucoesOrigem = await _campaignMonitorApplication.GetSourceExecutionsByCampaignAsync(
                     client.CampaignConfig.Database, campaign.IdCampaign);
 
                 if (execucoesOrigem?.Any() == true)
                 {
-                    campaign.Executions = execucoesOrigem.Select(exec =>
-                    {
-                        var execDto = _mapper.Map<ExecutionMonitoringDto>(exec);
-
-                        // Enriquecer cada workflow com informações adicionais
-                        if (execDto.WorkflowSteps?.Any() == true)
-                        {
-                            EnriquecerWorkflowSteps(execDto.WorkflowSteps);
-                        }
-
-                        return execDto;
-                    }).ToList();
-
-                    _logger.LogDebug("Mapeadas {TotalExecucoes} execuções com {TotalSteps} steps total.",
-                        campaign.Executions.Count,
-                        campaign.Executions.Sum(e => e.WorkflowSteps?.Count ?? 0));
+                    campaign.Executions = _mapper.Map<List<Execution>>(execucoesOrigem);
                 }
                 else
                 {
-                    campaign.Executions = new List<ExecutionMonitoringDto>();
+                    campaign.Executions = new List<Execution>();
                 }
-
-                // TODO: Buscar dados de integração com canais
-                // await EnriquecerComDadosDosCanaisAsync(client, campaign);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao enriquecer campanha com dados complementares.");
-                campaign.Executions = new List<ExecutionMonitoringDto>();
+                _logger.LogError(ex, "Erro ao enriquecer campanha com dados de execuções.");
+                campaign.Executions = new List<Execution>();
             }
         }
 
-        private void EnriquecerWorkflowSteps(List<WorkflowMonitoringDto> workflowSteps)
-        {
-            for (int i = 0; i < workflowSteps.Count; i++)
-            {
-                var step = workflowSteps[i];
-                step.StepOrder = i + 1;
-
-                // Identificar componentes de espera
-                step.IsWaitingComponent = step.Type.Equals("Wait", StringComparison.OrdinalIgnoreCase);
-
-                // Gerar mensagem de status personalizada
-                if (string.IsNullOrEmpty(step.StatusMessage))
-                {
-                    step.StatusMessage = GerarMensagemStatus(step);
-                }
-
-                // Adicionar ao histórico
-                if (!string.IsNullOrEmpty(step.StatusMessage))
-                {
-                    step.StatusHistory.Add($"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} - {step.StatusMessage}");
-                }
-            }
-        }
-
-        private string GerarMensagemStatus(WorkflowMonitoringDto step)
-        {
-            return step.Type switch
-            {
-                "Filter" => $"Filtro processado com {step.TotalUsers:N0} usuários - Status: {step.Status}",
-                "Channel" when step.Status == "Completed" => $"Canal integrado com sucesso - {step.TotalUsers:N0} usuários processados",
-                "Channel" when step.Status == "Running" => "Integração com canal em andamento",
-                "Channel" when step.Status == "Failed" => "Falha na integração com canal",
-                "Wait" when step.Status == "Running" => "Aguardando período de espera configurado",
-                "Wait" when step.Status == "Completed" => "Período de espera concluído",
-                "DecisionSplit" => $"Decisão processada - {step.TotalUsers:N0} usuários direcionados",
-                "RandomSplit" => $"Divisão aleatória realizada - {step.TotalUsers:N0} usuários distribuídos",
-                "End" => "Fluxo finalizado com sucesso",
-                _ when step.Status == "Failed" => $"Erro no step {step.Type}: {step.Error}",
-                _ when step.Status == "Running" => $"Step {step.Type} em execução",
-                _ => $"Step {step.Type} - Status: {step.Status}"
-            };
-        }
-
-        private CampaignType DeterminarTipoCampanha(CampaignMonitoringDto campaign)
+        private CampaignType DeterminarTipoCampanha(CampaignEntity campaign)
         {
             if (campaign.Scheduler?.IsRecurrent == true)
             {
                 return CampaignType.Recurrent;
             }
 
-            // Verificar pela presença de múltiplas execuções
             if (campaign.Executions?.Count > 1)
             {
                 return CampaignType.Recurrent;
@@ -256,7 +187,7 @@ namespace Campaign.Watch.Application.Services.Worker
             return CampaignType.Single;
         }
 
-        private async Task ValidarEProcessarCampanhaAsync(CampaignMonitoringDto campaign, CampaignType tipoCampanha)
+        private async Task ValidarEProcessarCampanhaAsync(CampaignEntity campaign, CampaignType tipoCampanha)
         {
             var campanhaExistente = await _campaignApplication.GetCampaignByIdCampaignAsync(campaign.IdCampaign);
             var agora = DateTime.UtcNow;
@@ -271,34 +202,29 @@ namespace Campaign.Watch.Application.Services.Worker
             }
         }
 
-        private async Task CriarNovaCampanhaAsync(CampaignMonitoringDto campaign, CampaignType tipoCampanha, DateTime now)
+        private async Task CriarNovaCampanhaAsync(CampaignEntity campaign, CampaignType tipoCampanha, DateTime now)
         {
             _logger.LogInformation("Criando nova campanha ({TipoCampanha}).", tipoCampanha);
 
-            var campanhaDto = _mapper.Map<CampaignDto>(campaign);
-            campanhaDto.LastCheckMonitoring = now;
-            campanhaDto.MonitoringStatus = DeterminarStatusMonitoramentoInicial(campaign, tipoCampanha, now);
+            campaign.LastCheckMonitoring = now;
+            campaign.MonitoringStatus = DeterminarStatusMonitoramentoInicial(campaign, tipoCampanha, now);
 
-            // Configurar próxima execução baseada no tipo
             if (tipoCampanha == CampaignType.Recurrent && campaign.Scheduler?.IsRecurrent == true)
             {
-                campanhaDto.NextExecutionMonitoring = SchedulerHelper.GetNextExecution(campaign.Scheduler.Crontab);
+                campaign.NextExecutionMonitoring = SchedulerHelper.GetNextExecution(campaign.Scheduler.Crontab);
             }
             else
             {
-                campanhaDto.NextExecutionMonitoring = campaign.Scheduler?.StartDateTime;
+                campaign.NextExecutionMonitoring = campaign.Scheduler?.StartDateTime;
             }
 
-            await _campaignApplication.CreateCampaignAsync(campanhaDto);
+            var campaignDto = _mapper.Map<CampaignResponse>(campaign);
+            await _campaignApplication.CreateCampaignAsync(campaignDto);
 
-            _logger.LogInformation("Campanha criada com status: {MonitoringStatus}", campanhaDto.MonitoringStatus);
+            _logger.LogInformation("Campanha criada com status: {MonitoringStatus}", campaign.MonitoringStatus);
         }
 
-        private async Task AtualizarCampanhaExistenteAsync(
-            CampaignDto existente,
-            CampaignMonitoringDto campanhaDaOrigem,
-            CampaignType tipoCampanha,
-            DateTime now)
+        private async Task AtualizarCampanhaExistenteAsync(CampaignResponse existente,CampaignEntity campanhaDaOrigem,CampaignType tipoCampanha,DateTime now)
         {
             bool mudouNaOrigem = campanhaDaOrigem.ModifiedAt > existente.ModifiedAt;
             bool precisaVerificarAtraso = DeveVerificarAtrasos(existente, tipoCampanha, now);
@@ -317,13 +243,12 @@ namespace Campaign.Watch.Application.Services.Worker
 
             _logger.LogInformation("Atualizando campanha. Motivos: {Motivos}", string.Join(", ", motivoAtualizacao));
 
-            var campanhaAtualizada = _mapper.Map<CampaignDto>(campanhaDaOrigem);
+            var campanhaAtualizada = _mapper.Map<CampaignResponse>(campanhaDaOrigem);
             campanhaAtualizada.Id = existente.Id;
             campanhaAtualizada.LastCheckMonitoring = now;
             campanhaAtualizada.MonitoringStatus = DeterminarStatusMonitoramentoAtualizado(
                 existente, campanhaDaOrigem, tipoCampanha, now);
 
-            // Atualizar próxima execução para campanhas recorrentes
             if (tipoCampanha == CampaignType.Recurrent &&
                 campanhaDaOrigem.Scheduler?.IsRecurrent == true)
             {
@@ -337,10 +262,7 @@ namespace Campaign.Watch.Application.Services.Worker
                 campanhaAtualizada.MonitoringStatus);
         }
 
-        private MonitoringStatus DeterminarStatusMonitoramentoInicial(
-            CampaignMonitoringDto campaign,
-            CampaignType tipoCampanha,
-            DateTime now)
+        private MonitoringStatus DeterminarStatusMonitoramentoInicial(CampaignEntity campaign,CampaignType tipoCampanha,DateTime now)
         {
             switch (campaign.StatusCampaign)
             {
@@ -371,11 +293,7 @@ namespace Campaign.Watch.Application.Services.Worker
             }
         }
 
-        private MonitoringStatus DeterminarStatusMonitoramentoAtualizado(
-            CampaignDto existente,
-            CampaignMonitoringDto campanhaDaOrigem,
-            CampaignType tipoCampanha,
-            DateTime now)
+        private MonitoringStatus DeterminarStatusMonitoramentoAtualizado(CampaignResponse existente,CampaignEntity campanhaDaOrigem,CampaignType tipoCampanha,DateTime now)
         {
             switch (campanhaDaOrigem.StatusCampaign)
             {
@@ -412,9 +330,8 @@ namespace Campaign.Watch.Application.Services.Worker
             }
         }
 
-        private bool DeveVerificarAtrasos(CampaignDto existente, CampaignType tipoCampanha, DateTime now)
+        private bool DeveVerificarAtrasos(CampaignResponse existente, CampaignType tipoCampanha, DateTime now)
         {
-            // Para campanhas recorrentes, sempre verificar se há atraso na próxima execução
             if (tipoCampanha == CampaignType.Recurrent)
             {
                 return existente.NextExecutionMonitoring.HasValue &&
@@ -422,7 +339,6 @@ namespace Campaign.Watch.Application.Services.Worker
                        existente.MonitoringStatus == MonitoringStatus.WaitingForNextExecution;
             }
 
-            // Para campanhas pontuais
             return existente.MonitoringStatus != MonitoringStatus.ExecutionDelayed &&
                    existente.StatusCampaign == CampaignStatus.Scheduled &&
                    existente.Scheduler != null &&
@@ -430,7 +346,7 @@ namespace Campaign.Watch.Application.Services.Worker
                    (existente.Executions == null || !existente.Executions.Any());
         }
 
-        private bool TemNovaExecucao(CampaignDto existente, CampaignMonitoringDto campanhaDaOrigem)
+        private bool TemNovaExecucao(CampaignResponse existente, CampaignEntity campanhaDaOrigem)
         {
             var execucoesExistentes = existente.Executions?.Count ?? 0;
             var execucoesAtuais = campanhaDaOrigem.Executions?.Count ?? 0;
@@ -440,8 +356,8 @@ namespace Campaign.Watch.Application.Services.Worker
 
         public enum CampaignType
         {
-            Single,      // Pontual - uma única execução
-            Recurrent    // Recorrente - múltiplas execuções baseadas no scheduler
+            Single,
+            Recurrent
         }
     }
 }
