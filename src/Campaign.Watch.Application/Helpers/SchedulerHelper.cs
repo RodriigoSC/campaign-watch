@@ -150,26 +150,73 @@ namespace Campaign.Watch.Application.Helpers
 
         /// <summary>
         /// Normaliza a expressão crontab para o formato de 5 campos esperado pela NCrontab.
-        /// Remove o campo de segundos (início) ou de ano (fim), se existirem.
+        /// Remove campos extras e substitui caracteres incompatíveis como '?'.
         /// </summary>
         private static string NormalizeCrontabExpression(string crontabExpression)
         {
             var parts = crontabExpression.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string fivePartExpression;
 
-            if (parts.Length == 6)
+            if (parts.Length == 7)
             {
-                // Se o último campo for um ano (comum em agendadores como Quartz.NET)
+                fivePartExpression = string.Join(" ", parts.Skip(1).Take(5));
+            }
+            else if (parts.Length == 6) // Formatos com 6 campos
+            {
                 if (int.TryParse(parts.Last(), out var year) && year > 1970)
                 {
-                    return string.Join(" ", parts.Take(5));
+                    fivePartExpression = string.Join(" ", parts.Take(5)); // Remove ano no final
                 }
-                // Se o primeiro campo for para segundos
                 else
                 {
-                    return string.Join(" ", parts.Skip(1));
+                    fivePartExpression = string.Join(" ", parts.Skip(1)); // Remove segundos no início
                 }
             }
-            return crontabExpression;
+            else
+            {
+                fivePartExpression = crontabExpression; // Assume que já está no formato correto
+            }
+
+            return fivePartExpression.Replace("?", "*");
+        }
+
+        /// <summary>
+        /// Obtém todas as ocorrências de uma expressão crontab dentro de um intervalo de datas.
+        /// </summary>
+        /// <param name="crontabExpression">A expressão crontab.</param>
+        /// <param name="startTime">A data de início do intervalo.</param>
+        /// <param name="endTime">A data de fim do intervalo.</param>
+        /// <returns>Uma coleção com todas as datas de execução agendadas dentro do intervalo.</returns>
+        public static IEnumerable<DateTime> GetAllOccurrences(string crontabExpression, DateTime startTime, DateTime endTime)
+        {
+            if (string.IsNullOrWhiteSpace(crontabExpression) || startTime > endTime)
+            {
+                return Enumerable.Empty<DateTime>();
+            }
+
+            var occurrences = new List<DateTime>();
+            try
+            {
+                var cleanExpression = NormalizeCrontabExpression(crontabExpression);
+                var schedule = CrontabSchedule.Parse(cleanExpression);
+
+                // Pega a primeira ocorrência a partir da data de início
+                var next = schedule.GetNextOccurrence(startTime);
+
+                // Continua pegando a próxima ocorrência até que ela ultrapasse a data final
+                while (next < endTime)
+                {
+                    occurrences.Add(next);
+                    next = schedule.GetNextOccurrence(next);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao obter ocorrências para '{crontabExpression}': {ex.Message}");
+                return Enumerable.Empty<DateTime>();
+            }
+
+            return occurrences;
         }
     }
 }

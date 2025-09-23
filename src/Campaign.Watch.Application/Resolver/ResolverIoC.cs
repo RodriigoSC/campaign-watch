@@ -21,6 +21,8 @@ namespace Campaign.Watch.Application.Resolver
 
             services.AddTransient<ICampaignMonitorApplication, CampaignMonitorApplication>();
             services.AddTransient<ICampaignMonitorFlow, CampaignMonitorFlow>();
+            services.AddScoped<ICampaignHealthCalculator, CampaignHealthCalculator>();
+            services.AddScoped<ICampaignDataProcessor, CampaignDataProcessor>();
 
             services.AddAutoMapper(typeof(ClientMapper));
             services.AddAutoMapper(typeof(CampaignMapper));

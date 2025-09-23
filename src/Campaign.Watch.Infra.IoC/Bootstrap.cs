@@ -4,6 +4,8 @@ using Campaign.Watch.Infra.Campaign.Resolver;
 using Campaign.Watch.Infra.Data.Factories;
 using Campaign.Watch.Infra.Data.Factories.Common;
 using Campaign.Watch.Infra.Data.Resolver;
+using Campaign.Watch.Infra.Effmail.Factories;
+using Campaign.Watch.Infra.Effmail.Resolver;
 using DTM_Vault.Data;
 using DTM_Vault.Data.Factory;
 using DTM_Vault.Data.KeyValue;
@@ -58,10 +60,17 @@ namespace Campaign.Watch.Infra.IoC
                 return new CampaignMongoFactory(mongoFactory);
             });
 
+            // Registra a fábrica específica para os bancos de dados de emails como Singleton.
+            services.AddSingleton<IEffmailMongoFactory>(sp =>
+            {
+                var mongoFactory = sp.GetRequiredService<IMongoDbFactory>();
+                return new EffmailMongoFactory(mongoFactory);
+            });
+
             // Chama os métodos de extensão de outras camadas para registrar suas respectivas dependências.
             services.AddDataRepository();
             services.AddCampaignRepository();
-            //services.AddEffmailRepository();
+            services.AddEffmailRepository();
             services.AddApplications();
         }
 

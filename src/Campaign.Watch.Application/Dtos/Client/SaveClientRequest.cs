@@ -27,7 +27,7 @@ namespace Campaign.Watch.Application.Dtos.Client
 
     public class EffectiveChannelDto
     {
-        public TypeChannels TypeChannel { get; set; }
+        public ChannelType TypeChannel { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]

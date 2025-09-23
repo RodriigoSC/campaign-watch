@@ -3,6 +3,7 @@ using Campaign.Watch.Application.Dtos.Campaign;
 using Campaign.Watch.Domain.Entities.Campaign;
 using Campaign.Watch.Domain.Entities.Read.Campaign;
 using Campaign.Watch.Domain.Enums;
+using MongoDB.Bson;
 using System;
 
 namespace Campaign.Watch.Application.Mappers.Campaign
@@ -15,7 +16,9 @@ namespace Campaign.Watch.Application.Mappers.Campaign
             CreateMap<CampaignEntity, CampaignResponse>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()))
                 .ForMember(dest => dest.StatusCampaign, opt => opt.MapFrom(src => src.StatusCampaign))
-                .ForMember(dest => dest.TypeCampaign, opt => opt.MapFrom(src => src.TypeCampaign.ToString()));
+                .ForMember(dest => dest.TypeCampaign, opt => opt.MapFrom(src => src.CampaignType.ToString()));
+
+            CreateMap<MonitoringHealthStatus, MonitoringHealthStatusDto>().ReverseMap();
 
             CreateMap<Scheduler, SchedulerResponse>().ReverseMap();
             CreateMap<Execution, ExecutionResponse>().ReverseMap();
@@ -36,14 +39,14 @@ namespace Campaign.Watch.Application.Mappers.Campaign
             // DTO de Resposta (Response) -> Entidade de Domínio
             CreateMap<CampaignResponse, CampaignEntity>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.Id) ? MongoDB.Bson.ObjectId.Parse(src.Id) : MongoDB.Bson.ObjectId.Empty))
-                .ForMember(dest => dest.TypeCampaign, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.TypeCampaign) && Enum.IsDefined(typeof(TypeCampaign), src.TypeCampaign) ? Enum.Parse<TypeCampaign>(src.TypeCampaign, true) : default));
+                .ForMember(dest => dest.CampaignType, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.TypeCampaign) && Enum.IsDefined(typeof(CampaignType), src.TypeCampaign) ? Enum.Parse<CampaignType>(src.TypeCampaign, true) : default));
 
             // Entidade de Leitura (Origem) -> Entidade de Domínio
             CreateMap<CampaignRead, CampaignEntity>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.IdCampaign, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.StatusCampaign, opt => opt.MapFrom(src => (CampaignStatus)src.Status))
-                .ForMember(dest => dest.TypeCampaign, opt => opt.MapFrom(src => (TypeCampaign)src.Type))
+                .ForMember(dest => dest.CampaignType, opt => opt.MapFrom(src => (CampaignType)src.Type))
                 .ForMember(dest => dest.Scheduler, opt => opt.MapFrom(src => src.Scheduler))
                 .ForMember(dest => dest.Executions, opt => opt.Ignore());
 
@@ -54,7 +57,15 @@ namespace Campaign.Watch.Application.Mappers.Campaign
                 .ForMember(dest => dest.Steps, opt => opt.MapFrom(src => src.WorkflowExecution));
 
             CreateMap<WorkflowExecutionReadModel, Workflows>()
-                .ForMember(dest => dest.TotalUser, opt => opt.MapFrom(src => src.TotalUsers));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()))
+                .ForMember(dest => dest.TotalUser, opt => opt.MapFrom(src => src.TotalUsers))
+                .ForMember(dest => dest.ChannelName, opt => {
+                    // Lógica ajustada para ler de um BsonDocument
+                    opt.MapFrom(src =>
+                        (src.ExecutionData != null && src.ExecutionData.Contains("ChannelName"))
+                            ? src.ExecutionData["ChannelName"].AsString
+                            : null);
+                });
         }
     }
 }

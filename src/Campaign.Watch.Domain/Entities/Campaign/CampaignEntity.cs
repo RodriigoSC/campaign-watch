@@ -33,9 +33,9 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         public string Name { get; set; }
 
         /// <summary>
-        /// Tipo da campanha (ex: Email, SMS).
+        /// Tipo da campanha (ex: Pontual, Recorrente).
         /// </summary>
-        public TypeCampaign TypeCampaign { get; set; }
+        public CampaignType CampaignType { get; set; }
 
         /// <summary>
         /// Descrição detalhada da campanha.
@@ -83,6 +83,11 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         public DateTime? LastCheckMonitoring { get; set; }
 
         /// <summary>
+        /// Agrupamento para flags de saúde do monitoramento.
+        /// </summary>
+        public MonitoringHealthStatus HealthStatus { get; set; }
+
+        /// <summary>
         /// Flag que indica se a campanha foi logicamente deletada.
         /// </summary>
         public bool IsDeleted { get; set; }
@@ -101,6 +106,37 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         /// Lista das execuções históricas da campanha.
         /// </summary>
         public List<Execution> Executions { get; set; }
+    }
+
+    /// <summary>
+    /// Objeto para agrupar as flags de saúde e problemas do monitoramento.
+    /// </summary>
+    public class MonitoringHealthStatus
+    {
+        /// <summary>
+        /// Indica se a campanha foi totalmente processada e verificada, incluindo todas as suas integrações.
+        /// </summary>
+        public bool IsFullyVerified { get; set; }
+
+        /// <summary>
+        /// Flag que aponta se existe alguma execução que deveria ter rodado (baseado no agendamento) mas ainda não foi encontrada na origem.
+        /// </summary>
+        public bool HasPendingExecution { get; set; }
+
+        /// <summary>
+        /// Flag geral que indica se há algum erro de integração em qualquer uma das execuções.
+        /// </summary>
+        public bool HasIntegrationErrors { get; set; }
+
+        /// <summary>
+        /// Armazena o ID da última execução que apresentou algum problema, facilitando a depuração.
+        /// </summary>
+        public string LastExecutionWithIssueId { get; set; }
+
+        /// <summary>
+        /// Armazena a última mensagem de erro ou nota importante do monitoramento.
+        /// </summary>
+        public string LastMessage { get; set; }
     }
 
     /// <summary>
@@ -160,6 +196,16 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         public DateTime? EndDate { get; set; }
 
         /// <summary>
+        /// Indica se todos os steps de canal dentro desta execução foram verificados e tiveram seus dados de integração populados pelo worker.
+        /// </summary>
+        public bool IsFullyVerifiedByMonitoring { get; set; }
+
+        /// <summary>
+        /// Indica se algum erro foi detectado durante o monitoramento desta execução específica (ex: falha ao buscar dados de integração).
+        /// </summary>
+        public bool HasMonitoringErrors { get; set; }
+
+        /// <summary>
         /// Lista de etapas (workflows) que compõem a execução.
         /// </summary>
         public List<Workflows> Steps { get; set; }
@@ -170,6 +216,11 @@ namespace Campaign.Watch.Domain.Entities.Campaign
     /// </summary>
     public class Workflows
     {
+        /// <summary>
+        /// ID da etapa do workflow na origem.
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>
         /// Nome da etapa do workflow.
         /// </summary>
@@ -199,6 +250,17 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         /// Objeto que armazena informações de erro, se houver.
         /// </summary>
         public object Error { get; set; }
+
+        /// <summary>
+        /// Nome do canal extraído dos dados da execução, se o tipo for 'Channel'.
+        /// Ex: "EffectiveMail", "EffectiveSms".
+        /// </summary>
+        public string ChannelName { get; set; }
+
+        /// <summary>
+        /// Armazena notas ou mensagens de erro específicas do worker para este step.
+        /// </summary>
+        public string MonitoringNotes { get; set; }
 
         /// <summary>
         /// Dados específicos da integração de canal (Email, SMS, Push), se aplicável.

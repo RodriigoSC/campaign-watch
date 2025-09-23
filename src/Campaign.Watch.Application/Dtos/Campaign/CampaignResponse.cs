@@ -21,8 +21,26 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public MonitoringStatus MonitoringStatus { get; set; }
         public DateTime? NextExecutionMonitoring { get; set; }
         public DateTime? LastCheckMonitoring { get; set; }
+
+        /// <summary>
+        /// DTO contendo as flags de saúde do monitoramento da campanha.
+        /// </summary>
+        public MonitoringHealthStatusDto HealthStatus { get; set; }
+
         public SchedulerResponse Scheduler { get; set; }
         public List<ExecutionResponse> Executions { get; set; }
+    }
+
+    /// <summary>
+    /// DTO para agrupar as flags de saúde e problemas do monitoramento.
+    /// </summary>
+    public class MonitoringHealthStatusDto
+    {
+        public bool IsFullyVerified { get; set; }
+        public bool HasPendingExecution { get; set; }
+        public bool HasIntegrationErrors { get; set; }
+        public string LastExecutionWithIssueId { get; set; }
+        public string LastMessage { get; set; }
     }
 
     public class SchedulerResponse
@@ -40,19 +58,39 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public string Status { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+
+        /// <summary>
+        /// Indica se todos os steps de canal dentro desta execução foram verificados pelo worker.
+        /// </summary>
+        public bool IsFullyVerifiedByMonitoring { get; set; }
+
+        /// <summary>
+        /// Indica se algum erro foi detectado durante o monitoramento desta execução.
+        /// </summary>
+        public bool HasMonitoringErrors { get; set; }
+
         public List<WorkflowResponse> Steps { get; set; }
     }
 
     public class WorkflowResponse
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
+        public string ChannelName { get; set; }
         public string Status { get; set; }
         public long TotalUser { get; set; }
         public long TotalExecutionTime { get; set; }
         public object Error { get; set; }
+
+        /// <summary>
+        /// Armazena notas ou mensagens de erro específicas do worker para este step.
+        /// </summary>
+        public string MonitoringNotes { get; set; }
+
         public IntegrationDataResponseBase IntegrationData { get; set; }
     }
+
     public abstract class IntegrationDataResponseBase
     {
         public string ChannelName { get; set; }

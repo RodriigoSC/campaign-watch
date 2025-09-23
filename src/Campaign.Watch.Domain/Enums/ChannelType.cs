@@ -3,7 +3,7 @@
     /// <summary>
     /// Define os tipos de canais de comunicação disponíveis.
     /// </summary>
-    public enum TypeChannels
+    public enum ChannelType
     {
         /// <summary>
         /// Canal de E-mail.
@@ -31,8 +31,13 @@
         EffectiveWhatsApp = 5,
 
         /// <summary>
+        /// Canal de API.
+        /// </summary>       
+        EffectiveApi = 6,
+
+        /// <summary>
         /// Canal de Landing Pages.
         /// </summary>
-        EffectivePages = 6
+        EffectivePages = 7,
     }
 }
