@@ -52,6 +52,12 @@ namespace Campaign.Watch.Application.Services.Worker
                 healthStatus.LastMessage = ultimaExecucaoComErro.Steps?.FirstOrDefault(s => !string.IsNullOrEmpty(s.MonitoringNotes))?.MonitoringNotes ?? "Erro de integração detectado.";
             }
 
+            // Se não houver erros de integração, verificamos se há um "Wait" ativo.
+            if (!healthStatus.HasIntegrationErrors)
+            {
+                VerificarEtapaDeEsperaAtiva(campaign, healthStatus);
+            }
+
             // A verificação de execução pendente agora é mais robusta com as execuções "fantasmas"
             if (!healthStatus.HasIntegrationErrors)
             {
@@ -82,6 +88,40 @@ namespace Campaign.Watch.Application.Services.Worker
                     return MonitoringStatus.Pending;
                 default:
                     return MonitoringStatus.Pending;
+            }
+        }
+
+        /// <summary>
+        /// Verifica se a campanha está em um estado de espera legítimo devido a um componente "Wait" ativo.
+        /// </summary>
+        private void VerificarEtapaDeEsperaAtiva(CampaignEntity campaign, MonitoringHealthStatus healthStatus)
+        {
+            // Só executa essa verificação se a campanha estiver em execução e sem outros erros já detectados.
+            if (campaign.StatusCampaign != CampaignStatus.Executing || healthStatus.HasIntegrationErrors)
+            {
+                return;
+            }
+
+            var lastExecution = campaign.Executions?.OrderBy(e => e.StartDate).LastOrDefault();
+            if (lastExecution?.Steps == null) return;
+
+            // Procura por um passo de "Wait" que esteja atualmente em execução ("Running")
+            var activeWaitStep = lastExecution.Steps.FirstOrDefault(s => s.Type == "Wait" && s.Status == "Running");
+
+            if (activeWaitStep != null && activeWaitStep.TotalExecutionTime > 0)
+            {
+                // ASSUMINDO que TotalExecutionTime está em segundos. Se for milissegundos, use TimeSpan.FromMilliseconds.
+                // Acesso direto à propriedade, sem o .Value
+                var waitDuration = TimeSpan.FromSeconds(activeWaitStep.TotalExecutionTime);
+
+                // A melhor estimativa que temos para o início da espera é o início da própria execução.
+                var expectedEndTime = lastExecution.StartDate.Add(waitDuration);
+
+                // Atualiza a mensagem de saúde com uma informação clara e útil.
+                healthStatus.LastMessage = $"Em andamento. Aguardando componente de espera ('{activeWaitStep.Name}') até aprox. {expectedEndTime:dd/MM/yyyy HH:mm}.";
+
+                // Garante que essa condição "saudável" não seja marcada como um problema de execução pendente.
+                healthStatus.HasPendingExecution = false;
             }
         }
     }
