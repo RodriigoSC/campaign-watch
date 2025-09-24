@@ -64,7 +64,6 @@ namespace Campaign.Watch.Application.Services.Worker
             return campaignEntity;
         }
 
-        // Todos os métodos privados de enriquecimento e verificação vêm para cá
         /// <summary>
         /// Compara as execuções reais de uma campanha recorrente com as execuções esperadas
         /// e cria placeholders de erro para qualquer execução ausente.

@@ -9,8 +9,8 @@ using Campaign.Watch.Domain.Entities.Campaign;
 using Campaign.Watch.Domain.Entities.Read.Campaign;
 using Campaign.Watch.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,6 +29,10 @@ namespace Campaign.Watch.Application.Services.Worker
         private readonly ICampaignHealthCalculator _healthCalculator;
         private readonly ILogger<CampaignMonitorFlow> _logger;
         private readonly IMapper _mapper;
+
+
+        private static DateTime _lastFullSync = DateTime.MinValue;
+        private readonly TimeSpan _fullSyncInterval = TimeSpan.FromHours(1);
 
         public CampaignMonitorFlow(
             IClientApplication clientApplication,
@@ -50,106 +54,90 @@ namespace Campaign.Watch.Application.Services.Worker
 
         /// <summary>
         /// Ponto de entrada principal para o processo de monitoramento de campanhas.
-        /// </summary>
+        /// </summary>       
         public async Task MonitorarCampanhasAsync()
         {
-            _logger.LogInformation("Iniciando ciclo de monitoramento de campanhas...");
-            var campanhasProcessadas = 0;
-            var clientesComErro = 0;
+            var now = DateTime.UtcNow;
 
-            try
+            if (now - _lastFullSync > _fullSyncInterval)
             {
-                var clientes = await _clientApplication.GetAllClientsAsync() ?? Enumerable.Empty<ClientResponse>();
-                var clientesAtivos = clientes.Where(c => c.IsActive).ToList();
-
-                _logger.LogInformation("Foram encontrados {TotalClientesAtivos} clientes ativos para monitoramento.", clientesAtivos.Count);
-
-                foreach (var cliente in clientesAtivos)
-                {
-                    try
-                    {
-                        using var clientScope = _logger.BeginScope(new Dictionary<string, object> { ["ClientName"] = cliente.Name });
-                        var processadasCliente = await ProcessarCampanhasDoClienteAsync(cliente);
-                        campanhasProcessadas += processadasCliente;
-                    }
-                    catch (Exception ex)
-                    {
-                        clientesComErro++;
-                        _logger.LogError(ex, "Erro inesperado ao processar campanhas para o cliente {ClientName}.", cliente.Name);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex, "Erro fatal no fluxo de monitoramento de campanhas. O ciclo foi interrompido.");
-                throw;
+                _logger.LogInformation("Iniciando ciclo de sincronização completa de novas campanhas.");
+                await SincronizarNovasCampanhasAsync();
+                _lastFullSync = now;
+                _logger.LogInformation("Ciclo de sincronização completa finalizado.");
             }
 
-            _logger.LogInformation(
-                "Ciclo de monitoramento concluído. Total de campanhas processadas: {CampanhasProcessadas}, Clientes com erro: {ClientesComErro}",
-                campanhasProcessadas, clientesComErro);
+            _logger.LogInformation("Iniciando ciclo de monitoramento de campanhas pendentes.");
+            await MonitorarCampanhasPendentesAsync();
+            _logger.LogInformation("Ciclo de monitoramento de campanhas pendentes finalizado.");
         }
 
         /// <summary>
-        /// Processa todas as campanhas monitoráveis de um cliente específico.
+        /// Processo secundário e mais pesado: busca todas as campanhas de todos os clientes na origem
+        /// e insere na base de monitoramento aquelas que ainda não existem.
         /// </summary>
-        private async Task<int> ProcessarCampanhasDoClienteAsync(ClientResponse client)
+        private async Task SincronizarNovasCampanhasAsync()
         {
-            if (client.CampaignConfig?.Database == null)
+            var clientes = (await _clientApplication.GetAllClientsAsync() ?? Enumerable.Empty<ClientResponse>())
+                           .Where(c => c.IsActive).ToList();
+
+            foreach (var cliente in clientes)
             {
-                _logger.LogWarning("Cliente {ClientName} não possui configuração de banco de dados de campanha e será ignorado.", client.Name);
-                return 0;
+                var campanhasOrigem = await _campaignMonitorApplication.GetSourceCampaignsByClientAsync(cliente.CampaignConfig.Database);
+                if (!campanhasOrigem.Any()) continue;
+
+                foreach (var campanhaOrigem in campanhasOrigem)
+                {
+                    var campanhaExistente = await _campaignApplication.GetCampaignByIdCampaignAsync(cliente.Name, campanhaOrigem.Id);
+                    if (campanhaExistente == null)
+                    {
+                        _logger.LogInformation("Nova campanha encontrada na origem: '{CampaignName}'. Sincronizando.", campanhaOrigem.Name);
+                        await ProcessarCampanhaUnicaAsync(cliente, campanhaOrigem);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Processo principal e rápido: busca e atualiza apenas as campanhas que já existem
+        /// e estão agendadas para monitoramento.
+        /// </summary>
+        private async Task MonitorarCampanhasPendentesAsync()
+        {
+            var campanhasParaProcessar = await _campaignApplication.GetCampaignsDueForMonitoringAsync();
+            if (!campanhasParaProcessar.Any())
+            {
+                _logger.LogInformation("Nenhuma campanha pendente de monitoramento encontrada.");
+                return;
             }
 
-            _logger.LogInformation("Iniciando processamento de campanhas do cliente.");
+            _logger.LogInformation("Encontradas {TotalCampanhas} campanhas para processamento.", campanhasParaProcessar.Count());
 
-            var campanhasOrigem = await BuscarCampanhasDaOrigemAsync(client);
-            if (!campanhasOrigem.Any())
+            foreach (var campanha in campanhasParaProcessar)
             {
-                _logger.LogInformation("Nenhuma campanha encontrada na origem para o cliente.");
-                return 0;
-            }
+                var cliente = await _clientApplication.GetClientByNameAsync(campanha.ClientName);
+                if (cliente == null || !cliente.IsActive) continue;
 
-            _logger.LogInformation("Encontradas {TotalCampanhas} campanhas na origem.", campanhasOrigem.Count());
+                //var campanhaOrigem = await BuscarCampanhaDaOrigemAsync(cliente, campanha.IdCampaign);
+                var campanhaOrigem = await _campaignMonitorApplication.GetSourceCampaignByIdAsync(cliente.CampaignConfig.Database, campanha.IdCampaign);
+                if (campanhaOrigem == null)
+                {
+                    _logger.LogWarning("Campanha '{CampaignName}' (Id: {CampaignId}) não encontrada na origem.", campanha.Name, campanha.IdCampaign);
+                    continue;
+                }
 
-            var processadasCount = 0;
-            foreach (var campanhaOrigem in campanhasOrigem)
-            {
                 try
                 {
-                    using var campaignScope = _logger.BeginScope(new Dictionary<string, object>
-                    {
-                        ["CampaignId"] = campanhaOrigem.Id,
-                        ["CampaignName"] = campanhaOrigem.Name
-                    });
-
-                    await ProcessarCampanhaUnicaAsync(client, campanhaOrigem);
-                    processadasCount++;
+                    await ProcessarCampanhaUnicaAsync(cliente, campanhaOrigem);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Falha ao processar uma campanha específica. Continuando para a próxima.");
+                    _logger.LogError(ex, "Falha ao processar a campanha específica '{CampaignName}'.", campanha.Name);
                 }
             }
-            return processadasCount;
         }
 
-        /// <summary>
-        /// Busca as campanhas da base de dados de origem do cliente.
-        /// </summary>
-        private async Task<IEnumerable<CampaignRead>> BuscarCampanhasDaOrigemAsync(ClientResponse client)
-        {
-            try
-            {
-                var campaigns = await _campaignMonitorApplication.GetSourceCampaignsByClientAsync(client.CampaignConfig.Database);
-                return campaigns ?? Enumerable.Empty<CampaignRead>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao buscar campanhas da origem do banco de dados: {DatabaseName}", client.CampaignConfig.Database);
-                return Enumerable.Empty<CampaignRead>();
-            }
-        }
+        
 
         /// <summary>
         /// Orquestra o processamento de uma única campanha, delegando tarefas para outros serviços.
@@ -180,76 +168,27 @@ namespace Campaign.Watch.Application.Services.Worker
         /// </summary>
         private async Task SalvarOuAtualizarCampanhaAsync(CampaignEntity campaign, CampaignType tipoCampanha)
         {
-            var campanhaExistente = await _campaignApplication.GetCampaignByIdCampaignAsync(campaign.IdCampaign);
+            // Busca o registro existente para obter o ObjectId, se houver.
+            var campanhaExistente = await _campaignApplication.GetCampaignByIdCampaignAsync(campaign.ClientName, campaign.IdCampaign);
             var agora = DateTime.UtcNow;
 
-            if (campanhaExistente == null)
-            {
-                await CriarNovaCampanhaAsync(campaign, agora);
-            }
-            else
-            {
-                await AtualizarCampanhaExistenteAsync(campanhaExistente, campaign, agora);
-            }
-        }
+            campaign.LastCheckMonitoring = agora;
 
-        /// <summary>
-        /// Cria uma nova campanha no banco de dados local.
-        /// </summary>
-        private async Task CriarNovaCampanhaAsync(CampaignEntity campaign, DateTime now)
-        {
-            _logger.LogInformation("Campanha não encontrada localmente. Criando novo registro.");
+            // Se a campanha já existe, preservamos seu ObjectId original.
+            // Se não, o ObjectId será gerado pelo MongoDB na inserção (upsert).
+            var objectIdParaAtualizar = campanhaExistente?.Id ?? ObjectId.GenerateNewId().ToString();
 
-            campaign.LastCheckMonitoring = now;
-
+            // Mapeia a entidade atualizada para o DTO que o serviço de aplicação espera.
             var campaignDto = _mapper.Map<CampaignResponse>(campaign);
-            await _campaignApplication.CreateCampaignAsync(campaignDto);
 
-            _logger.LogInformation("Nova campanha criada com status de monitoramento: {MonitoringStatus}", campaign.MonitoringStatus);
-        }
+            _logger.LogInformation("Persistindo campanha (Upsert) com IdCampaign: {IdCampaign}", campaign.IdCampaign);
 
-        /// <summary>
-        /// Atualiza uma campanha existente com novos dados da origem e status de monitoramento.
-        /// </summary>
-        private async Task AtualizarCampanhaExistenteAsync(CampaignResponse existente, CampaignEntity origem, DateTime now)
-        {
-            var paraAtualizar = _mapper.Map<CampaignEntity>(existente);
+            // Chamamos diretamente o Update, que agora fará o Upsert.
+            await _campaignApplication.UpdateCampaignAsync(objectIdParaAtualizar, campaignDto);
 
-            // Atualiza a entidade local com os dados mais recentes da origem e os calculados
-            paraAtualizar.Executions = origem.Executions;
-            paraAtualizar.StatusCampaign = origem.StatusCampaign;
-            paraAtualizar.ModifiedAt = origem.ModifiedAt;
-            paraAtualizar.Scheduler = origem.Scheduler;
-            paraAtualizar.HealthStatus = origem.HealthStatus;
-            paraAtualizar.MonitoringStatus = origem.MonitoringStatus;
-            paraAtualizar.NextExecutionMonitoring = origem.NextExecutionMonitoring;
-
-            // Verifica se uma atualização é realmente necessária
-            if (!IsUpdateRequired(existente, origem, paraAtualizar.HealthStatus))
-            {
-                _logger.LogDebug("Nenhuma alteração funcional detectada. A atualização da campanha não é necessária.");
-                return;
-            }
-
-            _logger.LogInformation("Detectada alteração na origem ou no status de saúde. Atualizando campanha.");
-            paraAtualizar.LastCheckMonitoring = now;
-
-            var dtoParaAtualizar = _mapper.Map<CampaignResponse>(paraAtualizar);
-            await _campaignApplication.UpdateCampaignAsync(existente.Id, dtoParaAtualizar);
-
-            _logger.LogInformation("Campanha atualizada. Novo status de monitoramento: {MonitoringStatus}", paraAtualizar.MonitoringStatus);
-        }
-
-        /// <summary>
-        /// Determina se uma campanha precisa ser atualizada no banco de dados.
-        /// </summary>
-        private bool IsUpdateRequired(CampaignResponse existente, CampaignEntity origem, MonitoringHealthStatus novoStatusSaude)
-        {
-            bool mudouNaOrigem = origem.ModifiedAt > existente.ModifiedAt;
-            bool temNovaExecucao = (origem.Executions?.Count ?? 0) > (existente.Executions?.Count ?? 0);
-            bool mudouStatusSaude = !Equals(existente.HealthStatus, novoStatusSaude);
-
-            return mudouNaOrigem || temNovaExecucao || mudouStatusSaude;
+            _logger.LogInformation(
+                "Campanha persistida com sucesso. Status de monitoramento: {MonitoringStatus}",
+                campaign.MonitoringStatus);
         }
     }
 }

@@ -74,7 +74,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Campaign
         public int TotalExecutionTime { get; set; }
 
         [JsonPropertyName("Error")]
-        public object Error { get; set; }
+        public BsonDocument Error { get; set; }
 
         [BsonElement("ExecutionData")]
         public BsonDocument ExecutionData { get; set; }

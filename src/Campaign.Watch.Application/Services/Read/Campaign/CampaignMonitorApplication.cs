@@ -33,6 +33,12 @@ namespace Campaign.Watch.Application.Services.Read.Campaign
             return _mapper.Map<IEnumerable<ExecutionRead>>(sourceExecutions);
         }
 
+        public async Task<CampaignRead> GetSourceCampaignByIdAsync(string dbName, string campaignId)
+        {
+            var sourceCampaign = await _campaignReadService.GetCampaignById(dbName, campaignId);
+            return _mapper.Map<CampaignRead>(sourceCampaign);
+        }
+
         #endregion
 
     }

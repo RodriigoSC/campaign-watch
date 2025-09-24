@@ -66,6 +66,8 @@ namespace Campaign.Watch.Infra.Data.Services
                 throw new ArgumentException($"O cliente especificado ('{entity.ClientName}') não existe.");
             }
 
+            entity.Id = id;
+
             return await _campaignRepository.UpdateCampaignAsync(id, entity);
         }
 
@@ -136,9 +138,15 @@ namespace Campaign.Watch.Infra.Data.Services
         }
 
         /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByIdCampaignAsync(string idCampaign)
+        public async Task<CampaignEntity> GetCampaignByIdCampaignAsync(string clientName, string idCampaign)
         {
-            return await _campaignRepository.GetCampaignByIdCampaignAsync(idCampaign);
+            return await _campaignRepository.GetCampaignByIdCampaignAsync(clientName, idCampaign);
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CampaignEntity>> GetCampaignsDueForMonitoringAsync()
+        {
+            return await _campaignRepository.GetCampaignsDueForMonitoringAsync();
         }
     }
 }

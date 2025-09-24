@@ -21,11 +21,6 @@
         EffectivePush = 3,
 
         /// <summary>
-        /// Canal de Social (Facebook - Custom Audience).
-        /// </summary>
-        EffectiveSocial = 4,
-
-        /// <summary>
         /// Canal de WhatsApp.
         /// </summary>
         EffectiveWhatsApp = 5,
@@ -33,11 +28,6 @@
         /// <summary>
         /// Canal de API.
         /// </summary>       
-        EffectiveApi = 6,
-
-        /// <summary>
-        /// Canal de Landing Pages.
-        /// </summary>
-        EffectivePages = 7,
+        EffectiveApi = 6
     }
 }

@@ -85,10 +85,16 @@ namespace Campaign.Watch.Application.Services.Campaign
             return _mapper.Map<IEnumerable<CampaignResponse>>(campaigns);
         }
 
-        public async Task<CampaignResponse> GetCampaignByIdCampaignAsync(string idCampaign)
+        public async Task<CampaignResponse> GetCampaignByIdCampaignAsync(string clientName, string idCampaign)
         {
-            var campaign = await _campaignService.GetCampaignByIdCampaignAsync(idCampaign);
+            var campaign = await _campaignService.GetCampaignByIdCampaignAsync(clientName, idCampaign);
             return _mapper.Map<CampaignResponse>(campaign);
+        }
+
+        public async Task<IEnumerable<CampaignResponse>> GetCampaignsDueForMonitoringAsync()
+        {
+            var campaigns = await _campaignService.GetCampaignsDueForMonitoringAsync();
+            return _mapper.Map<IEnumerable<CampaignResponse>>(campaigns);
         }
 
         #endregion

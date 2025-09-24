@@ -14,7 +14,6 @@ namespace Campaign.Watch.Application.Services.Worker
             var campaignType = DeterminarTipoCampanha(campaign);
             var nextExecution = CalcularProximaExecucao(campaign, campaignType, now);
 
-            // Atribui temporariamente para o cálculo de saúde usar
             campaign.NextExecutionMonitoring = nextExecution;
 
             var healthStatus = CalcularStatusDeSaude(campaign, campaignType, now);
@@ -58,7 +57,6 @@ namespace Campaign.Watch.Application.Services.Worker
                 VerificarEtapaDeEsperaAtiva(campaign, healthStatus);
             }
 
-            // A verificação de execução pendente agora é mais robusta com as execuções "fantasmas"
             if (!healthStatus.HasIntegrationErrors)
             {
                 healthStatus.LastMessage = "Campanha monitorada sem problemas aparentes.";

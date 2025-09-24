@@ -2,6 +2,7 @@
 using Campaign.Watch.Domain.Interfaces.Services.Read;
 using Campaign.Watch.Domain.Interfaces.Services.Read.Campaign;
 using Campaign.Watch.Infra.Campaign.Factories;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -44,6 +45,20 @@ namespace Campaign.Watch.Infra.Campaign.Services
             return await collection
                 .Find(x => x.CampaignId.ToString() == campaignId && x.FlagCount == false)
                 .ToListAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<CampaignRead> GetCampaignById(string dbName, string campaignId)
+        {
+            var db = _factory.GetDatabase(dbName);
+            var collection = db.GetCollection<CampaignRead>("Campaign");
+
+            if (!ObjectId.TryParse(campaignId, out var campaignObjectId))
+            {
+                return null;
+            }
+
+            return await collection.Find(x => x.Id == campaignObjectId.ToString()).FirstOrDefaultAsync();
         }
     }
 }

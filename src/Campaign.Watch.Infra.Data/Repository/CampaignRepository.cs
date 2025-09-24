@@ -20,15 +20,25 @@ namespace Campaign.Watch.Infra.Data.Repository
         /// Inicializa uma nova instância da classe CampaignRepository.
         /// Configura a coleção "CampaignMonitoring" e garante a criação de um índice único para o nome da campanha.
         /// </summary>
-        /// <param name="persistenceFactory">A fábrica para obter a instância do banco de dados.</param>
+        /// <param name="persistenceFactory">A fábrica para obter a instância do banco de dados.</param>        
         public CampaignRepository(IPersistenceMongoFactory persistenceFactory) : base(persistenceFactory, "CampaignMonitoring")
         {
-            var indexKeysDefinition = Builders<CampaignEntity>.IndexKeys.Ascending(x => x.IdCampaign);
-            var indexOptions = new CreateIndexOptions { Unique = true };
-            var indexModel = new CreateIndexModel<CampaignEntity>(indexKeysDefinition, indexOptions);
+            var uniqueIndexKeys = Builders<CampaignEntity>.IndexKeys
+                .Ascending(x => x.ClientName)
+                .Ascending(x => x.IdCampaign);
+            var uniqueIndexModel = new CreateIndexModel<CampaignEntity>(
+                uniqueIndexKeys,
+                new CreateIndexOptions { Unique = true, Name = "Client_IdCampaign_Unique" });
 
-            // Chamada síncrona para garantir que o índice seja criado antes de qualquer operação.
-            CreateIndexesAsync(new List<CreateIndexModel<CampaignEntity>> { indexModel }).GetAwaiter().GetResult();
+            
+            var workerIndexKeys = Builders<CampaignEntity>.IndexKeys
+                .Ascending(x => x.IsActive)
+                .Ascending(x => x.NextExecutionMonitoring);
+            var workerIndexModel = new CreateIndexModel<CampaignEntity>(
+                workerIndexKeys,
+                new CreateIndexOptions { Name = "Worker_Monitoring_Query" });
+
+            CreateIndexesAsync(new List<CreateIndexModel<CampaignEntity>> { uniqueIndexModel, workerIndexModel }).GetAwaiter().GetResult();
         }
 
         /// <inheritdoc />
@@ -41,8 +51,9 @@ namespace Campaign.Watch.Infra.Data.Repository
         /// <inheritdoc />
         public async Task<bool> UpdateCampaignAsync(ObjectId id, CampaignEntity entity)
         {
-            var result = await _collection.ReplaceOneAsync(c => c.Id == id, entity);
-            return result.IsAcknowledged && result.ModifiedCount > 0;
+            var filter = Builders<CampaignEntity>.Filter.Eq(c => c.IdCampaign, entity.IdCampaign);
+            var result = await _collection.ReplaceOneAsync(filter, entity, new ReplaceOptions { IsUpsert = true });
+            return result.IsAcknowledged && (result.ModifiedCount > 0 || result.UpsertedId != null);
         }
 
         /// <inheritdoc />
@@ -126,9 +137,26 @@ namespace Campaign.Watch.Infra.Data.Repository
         }
 
         /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByIdCampaignAsync(string idCampaign)
+        public async Task<CampaignEntity> GetCampaignByIdCampaignAsync(string clientName, string idCampaign)
         {
-            return await _collection.Find(c => c.IdCampaign == idCampaign).FirstOrDefaultAsync();
+            var filter = Builders<CampaignEntity>.Filter.And(
+                Builders<CampaignEntity>.Filter.Eq(c => c.ClientName, clientName),
+                Builders<CampaignEntity>.Filter.Eq(c => c.IdCampaign, idCampaign)
+            );
+            return await _collection.Find(filter).FirstOrDefaultAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CampaignEntity>> GetCampaignsDueForMonitoringAsync()
+        {
+            var now = DateTime.UtcNow;
+
+            var filter = Builders<CampaignEntity>.Filter.And(
+                Builders<CampaignEntity>.Filter.Eq(c => c.IsActive, true),
+                Builders<CampaignEntity>.Filter.Lte(c => c.NextExecutionMonitoring, now)
+            );
+            
+            return await _collection.Find(filter).ToListAsync();
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Campaign.Watch.Application.Interfaces.Read.Campaign
 
         Task<IEnumerable<CampaignRead>> GetSourceCampaignsByClientAsync(string dbName);
         Task<IEnumerable<ExecutionRead>> GetSourceExecutionsByCampaignAsync(string dbName, string campaignId);
+        Task<CampaignRead> GetSourceCampaignByIdAsync(string dbName, string campaignId);
 
         #endregion
     }

@@ -1,4 +1,5 @@
 ﻿using Campaign.Watch.Application.Dtos.Campaign;
+using Campaign.Watch.Domain.Entities.Read.Campaign;
 using Campaign.Watch.Domain.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,7 +19,8 @@ namespace Campaign.Watch.Application.Interfaces.Campaign
         Task<IEnumerable<CampaignResponse>> GetAllCampaignsByClientAsync(string clientName);
         Task<IEnumerable<CampaignResponse>> GetCampaignsByStatusAsync(CampaignStatus status);
         Task<IEnumerable<CampaignResponse>> GetCampaignsPaginatedAsync(int page, int pageSize);
-        Task<CampaignResponse> GetCampaignByIdCampaignAsync(string idCampaign);
+        Task<CampaignResponse> GetCampaignByIdCampaignAsync(string clientName, string idCampaign);
+        Task<IEnumerable<CampaignResponse>> GetCampaignsDueForMonitoringAsync();
 
         #endregion
     }

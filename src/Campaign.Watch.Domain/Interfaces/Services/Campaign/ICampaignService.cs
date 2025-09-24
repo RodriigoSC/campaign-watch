@@ -83,7 +83,7 @@ namespace Campaign.Watch.Domain.Interfaces.Services.Campaign
         /// </summary>
         /// <param name="idCampaign">O ID de origem da campanha.</param>
         /// <returns>A entidade da campanha, ou nulo se não for encontrada.</returns>
-        Task<CampaignEntity> GetCampaignByIdCampaignAsync(string idCampaign);
+        Task<CampaignEntity> GetCampaignByIdCampaignAsync(string clientName, string idCampaign);
 
         /// <summary>
         /// Busca todas as campanhas ativas.
@@ -112,5 +112,8 @@ namespace Campaign.Watch.Domain.Interfaces.Services.Campaign
         /// <param name="clientName">O nome do cliente.</param>
         /// <returns>O número de campanhas do cliente.</returns>
         Task<int> CountCampaignsByClientAsync(string clientName);
+
+        Task<IEnumerable<CampaignEntity>> GetCampaignsDueForMonitoringAsync();
+
     }
 }

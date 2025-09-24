@@ -24,10 +24,6 @@ namespace Campaign.Watch.Application.Mappers.Client
                             return context.Mapper.Map<EffectiveSms>(src);
                         case ChannelType.EffectivePush:
                             return context.Mapper.Map<EffectivePush>(src);
-                        case ChannelType.EffectivePages:
-                            return context.Mapper.Map<EffectivePages>(src);
-                        case ChannelType.EffectiveSocial:
-                            return context.Mapper.Map<EffectiveSocial>(src);
                         case ChannelType.EffectiveWhatsApp:
                             return context.Mapper.Map<EffectiveWhastApp>(src);
                         default:

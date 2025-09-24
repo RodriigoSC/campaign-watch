@@ -284,5 +284,25 @@ namespace Campaign.Watch.Domain.Entities.Read.Effmail
         /// </summary>
         [BsonElement("Success")]
         public int? Success { get; set; }
+
+        /// <summary>
+        /// Propriedade temporária para armazenar os leads vindos do $lookup na agregação.
+        /// Não precisa ser mapeada no seu banco de dados, é apenas para uso em tempo de execução.
+        /// </summary>
+        [BsonElement("Items")]
+        public List<LeadDocument> Items { get; set; } = new List<LeadDocument>();
+    }
+
+    /// <summary>
+    /// Classe auxiliar para desserializar os campos necessários da collection 'Lead' durante a agregação.
+    /// O driver precisa de um tipo para mapear os dados do $lookup.
+    /// </summary>
+    public class LeadDocument
+    {
+        [BsonElement("TriggerId")]
+        public ObjectId TriggerId { get; set; }
+
+        [BsonElement("LastStatus")]
+        public string LastStatus { get; set; }
     }
 }
