@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Campaign.Watch.Domain.Enums;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effmail
         /// O nome da trigger de e-mail.
         /// </summary>
         [BsonElement("Name")]
-        public string Nome { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// A data agendada para o disparo.
@@ -40,7 +41,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effmail
         /// O status numérico da trigger.
         /// </summary>
         [BsonElement("StatusTrigger")]
-        public int StatusTrigger { get; set; }
+        public StatusTrigger StatusTrigger { get; set; }
 
         /// <summary>
         /// Parâmetros de identificação que conectam a trigger a outras entidades.

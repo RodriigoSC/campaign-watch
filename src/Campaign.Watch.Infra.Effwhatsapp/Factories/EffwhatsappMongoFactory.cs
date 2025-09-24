@@ -1,12 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Campaign.Watch.Infra.Data.Factories.Common;
+using MongoDB.Driver;
 
 namespace Campaign.Watch.Infra.Effwhatsapp.Factories
 {
-    internal class EffwhatsappMongoFactory
+    public class EffwhatsappMongoFactory : IEffwhatsappMongoFactory
     {
+        private readonly IMongoDbFactory _factory;
+
+        public EffwhatsappMongoFactory(IMongoDbFactory factory)
+        {
+            _factory = factory;
+        }
+
+        public IMongoDatabase GetDatabase(string dbName)
+        {
+            return _factory.GetDatabase("MongoDB.Effwhatsapp", dbName);
+        }
     }
 }

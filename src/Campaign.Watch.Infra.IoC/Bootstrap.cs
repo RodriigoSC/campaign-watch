@@ -6,6 +6,12 @@ using Campaign.Watch.Infra.Data.Factories.Common;
 using Campaign.Watch.Infra.Data.Resolver;
 using Campaign.Watch.Infra.Effmail.Factories;
 using Campaign.Watch.Infra.Effmail.Resolver;
+using Campaign.Watch.Infra.Effpush.Factories;
+using Campaign.Watch.Infra.Effpush.Resolver;
+using Campaign.Watch.Infra.Effsms.Factories;
+using Campaign.Watch.Infra.Effsms.Resolver;
+using Campaign.Watch.Infra.Effwhatsapp.Factories;
+using Campaign.Watch.Infra.Effwhatsapp.Resolver;
 using DTM_Vault.Data;
 using DTM_Vault.Data.Factory;
 using DTM_Vault.Data.KeyValue;
@@ -67,10 +73,37 @@ namespace Campaign.Watch.Infra.IoC
                 return new EffmailMongoFactory(mongoFactory);
             });
 
+            // Registra a fábrica específica para os bancos de dados de sms como Singleton.
+            services.AddSingleton<IEffsmsMongoFactory>(sp =>
+            {
+                var mongoFactory = sp.GetRequiredService<IMongoDbFactory>();
+                return new EffsmsMongoFactory(mongoFactory);
+            });
+
+            // Registra a fábrica específica para os bancos de dados de push como Singleton.
+            services.AddSingleton<IEffpushMongoFactory>(sp =>
+            {
+                var mongoFactory = sp.GetRequiredService<IMongoDbFactory>();
+                return new EffpushMongoFactory(mongoFactory);
+            });
+
+            // Registra a fábrica específica para os bancos de dados de whatsapp como Singleton.
+            services.AddSingleton<IEffwhatsappMongoFactory>(sp =>
+            {
+                var mongoFactory = sp.GetRequiredService<IMongoDbFactory>();
+                return new EffwhatsappMongoFactory(mongoFactory);
+            });
+
             // Chama os métodos de extensão de outras camadas para registrar suas respectivas dependências.
             services.AddDataRepository();
+
             services.AddCampaignRepository();
+
             services.AddEffmailRepository();
+            services.AddEffsmsRepository();
+            services.AddEffpushRepository();
+            services.AddEffwhatsappRepository();
+
             services.AddApplications();
         }
 

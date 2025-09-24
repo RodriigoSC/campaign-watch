@@ -15,6 +15,9 @@
     <ProjectReference Include="..\Campaign.Watch.Infra.Campaign\Campaign.Watch.Infra.Campaign.csproj" />
     <ProjectReference Include="..\Campaign.Watch.Infra.Data\Campaign.Watch.Infra.Data.csproj" />
     <ProjectReference Include="..\Campaign.Watch.Infra.Effmail\Campaign.Watch.Infra.Effmail.csproj" />
+    <ProjectReference Include="..\Campaign.Watch.Infra.Effpush\Campaign.Watch.Infra.Effpush.csproj" />
+    <ProjectReference Include="..\Campaign.Watch.Infra.Effsms\Campaign.Watch.Infra.Effsms.csproj" />
+    <ProjectReference Include="..\Campaign.Watch.Infra.Effwhatsapp\Campaign.Watch.Infra.Effwhatsapp.csproj" />
   </ItemGroup>
 
 </Project>

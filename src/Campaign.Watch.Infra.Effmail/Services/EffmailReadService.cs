@@ -52,7 +52,7 @@ namespace Campaign.Watch.Infra.Effmail.Services
                     // Mapeamento dos campos da Trigger
                     Id = trigger.Id,
                     Status = trigger.Status,
-                    Nome = trigger.Nome,
+                    Name = trigger.Name,
                     AppointmentDate = trigger.AppointmentDate,
                     StatusTrigger = trigger.StatusTrigger,
                     Parameters = trigger.Parameters,
