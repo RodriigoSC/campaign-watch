@@ -30,7 +30,11 @@ namespace Campaign.Watch.Infra.Effmail.Services
             var pipeline = new BsonDocument[]
             {
                 // ETAPA 1: Filtrar as triggers pelo WorkflowId
-                new BsonDocument("$match", new BsonDocument("Parameters.WorkflowId", workflowId)),
+                new BsonDocument("$match", new BsonDocument
+                {
+                    { "Parameters.WorkflowId", workflowId },
+                    { "IsTest", false }
+                }),
 
                 // ETAPA 2: Realizar o $lookup com a sub-pipeline para contar os leads
                 new BsonDocument("$lookup", new BsonDocument
