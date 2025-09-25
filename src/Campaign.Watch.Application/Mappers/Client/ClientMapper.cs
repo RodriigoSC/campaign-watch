@@ -25,7 +25,7 @@ namespace Campaign.Watch.Application.Mappers.Client
                         case ChannelType.EffectivePush:
                             return context.Mapper.Map<EffectivePush>(src);
                         case ChannelType.EffectiveWhatsApp:
-                            return context.Mapper.Map<EffectiveWhastApp>(src);
+                            return context.Mapper.Map<EffectiveWhatsApp>(src);
                         default:
                             throw new NotImplementedException($"Mapeamento não implementado para TypeChannel: {src.TypeChannel}");
                     }
@@ -36,7 +36,7 @@ namespace Campaign.Watch.Application.Mappers.Client
             CreateMap<EffectiveChannelDto, EffectivePush>();
             CreateMap<EffectiveChannelDto, EffectivePages>();
             CreateMap<EffectiveChannelDto, EffectiveSocial>();
-            CreateMap<EffectiveChannelDto, EffectiveWhastApp>();
+            CreateMap<EffectiveChannelDto, EffectiveWhatsApp>();
 
 
             // Mapeamento da Entidade de Domínio para a Saída (Response)

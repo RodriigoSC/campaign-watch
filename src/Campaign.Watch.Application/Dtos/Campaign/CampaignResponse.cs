@@ -106,16 +106,23 @@ namespace Campaign.Watch.Application.Dtos.Campaign
 
     public class SmsIntegrationDataResponse : IntegrationDataResponseBase
     {
-        public string MessageTemplate { get; set; }
-        public int SentCount { get; set; }
-        public int DeliveryErrors { get; set; }
-        public int SuccessCount { get; set; }
+        public string TemplateId { get; set; }
+        public FileInfoDataResponse File { get; set; }
+        public LeadsDataResponse Leads { get; set; }
     }
 
     public class PushIntegrationDataResponse : IntegrationDataResponseBase
     {
-        public string MessageTemplate { get; set; }
-        public int SentDelivered { get; set; }
+        public string TemplateId { get; set; }
+        public FileInfoDataResponse File { get; set; }
+        public LeadsDataResponse Leads { get; set; }
+    }
+
+    public class WhatsAppIntegrationDataResponse : IntegrationDataResponseBase
+    {
+        public string TemplateId { get; set; }
+        public FileInfoDataResponse File { get; set; }
+        public LeadsDataResponse Leads { get; set; }
     }
 
     public class FileInfoDataResponse

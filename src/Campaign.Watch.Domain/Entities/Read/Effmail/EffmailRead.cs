@@ -301,7 +301,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effmail
     public class LeadDocument
     {
         [BsonElement("TriggerId")]
-        public ObjectId TriggerId { get; set; }
+        public string TriggerId { get; set; }
 
         [BsonElement("LastStatus")]
         public string LastStatus { get; set; }

@@ -272,7 +272,7 @@ namespace Campaign.Watch.Domain.Entities.Campaign
     /// Classe base abstrata para dados de integração de diferentes canais.
     /// Utiliza BsonKnownTypes para suportar polimorfismo no MongoDB.
     /// </summary>
-    [BsonKnownTypes(typeof(EmailIntegrationData), typeof(SmsIntegrationData), typeof(PushIntegrationData))]
+    [BsonKnownTypes(typeof(EmailIntegrationData), typeof(SmsIntegrationData), typeof(PushIntegrationData), typeof(WhatsAppIntegrationData))]
     public abstract class IntegrationDataBase
     {
         /// <summary>
@@ -313,24 +313,19 @@ namespace Campaign.Watch.Domain.Entities.Campaign
     public class SmsIntegrationData : IntegrationDataBase
     {
         /// <summary>
-        /// Conteúdo do template da mensagem de SMS.
+        /// ID do template de e-mail utilizado.
         /// </summary>
-        public string MessageTemplate { get; set; }
+        public string TemplateId { get; set; }
 
         /// <summary>
-        /// Quantidade de SMS enviados.
+        /// Informações sobre o arquivo de leads processado.
         /// </summary>
-        public int SentCount { get; set; }
+        public FileInfoData File { get; set; }
 
         /// <summary>
-        /// Quantidade de erros na entrega.
+        /// Estatísticas sobre o processamento dos leads.
         /// </summary>
-        public int DeliveryErrors { get; set; }
-
-        /// <summary>
-        /// Quantidade de entregas bem-sucedidas.
-        /// </summary>
-        public int SuccessCount { get; set; }
+        public LeadsData Leads { get; set; }
     }
 
     /// <summary>
@@ -339,14 +334,40 @@ namespace Campaign.Watch.Domain.Entities.Campaign
     public class PushIntegrationData : IntegrationDataBase
     {
         /// <summary>
-        /// Conteúdo do template da mensagem de Push.
+        /// ID do template de e-mail utilizado.
         /// </summary>
-        public string MessageTemplate { get; set; }
+        public string TemplateId { get; set; }
 
         /// <summary>
-        /// Quantidade de notificações Push entregues.
+        /// Informações sobre o arquivo de leads processado.
         /// </summary>
-        public int SentDelivered { get; set; }
+        public FileInfoData File { get; set; }
+
+        /// <summary>
+        /// Estatísticas sobre o processamento dos leads.
+        /// </summary>
+        public LeadsData Leads { get; set; }
+    }
+
+    /// <summary>
+    /// Dados de integração específicos para o canal de Push Notification.
+    /// </summary>
+    public class WhatsAppIntegrationData : IntegrationDataBase
+    {
+        /// <summary>
+        /// ID do template de e-mail utilizado.
+        /// </summary>
+        public string TemplateId { get; set; }
+
+        /// <summary>
+        /// Informações sobre o arquivo de leads processado.
+        /// </summary>
+        public FileInfoData File { get; set; }
+
+        /// <summary>
+        /// Estatísticas sobre o processamento dos leads.
+        /// </summary>
+        public LeadsData Leads { get; set; }
     }
 
     /// <summary>

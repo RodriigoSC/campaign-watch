@@ -6,6 +6,10 @@ using Campaign.Watch.Application.Interfaces.Worker;
 using Campaign.Watch.Domain.Entities.Campaign;
 using Campaign.Watch.Domain.Entities.Read.Campaign;
 using Campaign.Watch.Domain.Enums;
+using Campaign.Watch.Domain.Interfaces.Services.Read.Effmail;
+using Campaign.Watch.Domain.Interfaces.Services.Read.Effpush;
+using Campaign.Watch.Domain.Interfaces.Services.Read.Effsms;
+using Campaign.Watch.Domain.Interfaces.Services.Read.Effwhatsapp;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -19,15 +23,27 @@ namespace Campaign.Watch.Application.Services.Worker
         private readonly ICampaignMonitorApplication _campaignMonitorApplication;
         private readonly IMapper _mapper;
         private readonly ILogger<CampaignDataProcessor> _logger;
+        private readonly IEffmailReadService _effmailReadService;
+        private readonly IEffsmsReadService _effsmsReadService;
+        private readonly IEffpushReadService _effpushReadService;
+        private readonly IEffwhatsappReadService _effwhatsappReadService;
 
         public CampaignDataProcessor(
             ICampaignMonitorApplication campaignMonitorApplication,
             IMapper mapper,
-            ILogger<CampaignDataProcessor> logger)
+            ILogger<CampaignDataProcessor> logger,
+            IEffmailReadService effmailReadService,
+            IEffsmsReadService effsmsReadService,
+            IEffpushReadService effpushReadService,
+            IEffwhatsappReadService effwhatsappReadService)
         {
             _campaignMonitorApplication = campaignMonitorApplication;
             _mapper = mapper;
             _logger = logger;
+            _effmailReadService = effmailReadService;
+            _effsmsReadService = effsmsReadService;
+            _effpushReadService = effpushReadService;
+            _effwhatsappReadService = effwhatsappReadService;
         }
 
         public async Task<CampaignEntity> ProcessAndEnrichCampaignDataAsync(ClientResponse client, CampaignRead campaignSource)
@@ -161,6 +177,11 @@ namespace Campaign.Watch.Application.Services.Worker
                 channelIdentifier = nameof(ChannelType.EffectiveApi);
             }
 
+            if (channelIdentifier == "5")
+            {
+                channelIdentifier = nameof(ChannelType.EffectiveWhatsApp);
+            }
+
             if (!Enum.TryParse<ChannelType>(step.ChannelName, true, out var channelType))
             {
                 DefinirErroDeMonitoramento(execution, step, $"Tipo de canal '{step.ChannelName}' desconhecido.");
@@ -180,13 +201,53 @@ namespace Campaign.Watch.Application.Services.Worker
                 switch (channelConfig.TypeChannel)
                 {
                     case ChannelType.EffectiveMail:
-                        step.MonitoringNotes = "Busca de dados de Email (EffectiveMail) ainda não implementada.";
+                        var effmailData = await _effmailReadService.GetTriggerEffmail(channelConfig.Database, step.Id);
+                        var effmailTrigger = effmailData.FirstOrDefault();
+                        if (effmailTrigger != null)
+                        {
+                            integrationData = _mapper.Map<EmailIntegrationData>(effmailTrigger);
+                        }
+                        else
+                        {
+                            step.MonitoringNotes = "Nenhum dado de trigger encontrado para EffectiveMail.";
+                        }
                         break;
                     case ChannelType.EffectiveSms:
-                        step.MonitoringNotes = "Busca de dados de SMS (EffectiveSms) ainda não implementada.";
+                        var effsmsData = await _effsmsReadService.GetTriggerEffsms(channelConfig.Database, step.Id);
+                        var effsmsTrigger = effsmsData.FirstOrDefault();
+                        if (effsmsTrigger != null)
+                        {
+                            integrationData = _mapper.Map<SmsIntegrationData>(effsmsTrigger);
+                        }
+                        else
+                        {
+                            step.MonitoringNotes = "Nenhum dado de trigger encontrado para EffectiveSms.";
+                        }
                         break;
                     case ChannelType.EffectivePush:
-                        step.MonitoringNotes = "Busca de dados de Push (EffectivePush) ainda não implementada.";
+                        var effpushData = await _effpushReadService.GetTriggerEffpush(channelConfig.Database, step.Id);
+                        var effpushTrigger = effpushData.FirstOrDefault();
+                        if (effpushTrigger != null)
+                        {
+                            integrationData = _mapper.Map<PushIntegrationData>(effpushTrigger);
+                        }
+                        else
+                        {
+                            step.MonitoringNotes = "Nenhum dado de trigger encontrado para EffectivePush.";
+                        }
+                        break;
+                    case ChannelType.EffectiveWhatsApp:
+                        var effwhatsappData = await _effwhatsappReadService.GetTriggerEffwhatsapp(channelConfig.Database, step.Id);
+                        var effwhatsappTrigger = effwhatsappData.FirstOrDefault();
+                        if (effwhatsappTrigger != null)
+                        {
+                            integrationData = _mapper.Map<WhatsAppIntegrationData>(effwhatsappTrigger);
+                        }
+                        else
+                        {
+                            step.MonitoringNotes = "Nenhum dado de trigger encontrado para EffectiveWhatsApp.";
+                        }
+
                         break;
                     case ChannelType.EffectiveApi:
                         step.MonitoringNotes = "Busca de dados de API (EffectiveApi) ainda não implementada.";

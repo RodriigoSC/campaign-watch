@@ -63,7 +63,7 @@ namespace Campaign.Watch.Domain.Entities.Client
     /// Classe base abstrata para representar um canal de comunicação efetivo.
     /// Utiliza BsonKnownTypes para suportar polimorfismo no MongoDB para as classes derivadas.
     /// </summary>
-    [BsonKnownTypes(typeof(EffectiveMail),typeof(EffectiveSms),typeof(EffectivePush),typeof(EffectivePages),typeof(EffectiveSocial),typeof(EffectiveWhastApp), typeof(EffectiveApi))]
+    [BsonKnownTypes(typeof(EffectiveMail),typeof(EffectiveSms),typeof(EffectivePush),typeof(EffectivePages),typeof(EffectiveSocial),typeof(EffectiveWhatsApp), typeof(EffectiveApi))]
     public abstract class EffectiveChannel
     {
         /// <summary>
@@ -115,7 +115,7 @@ namespace Campaign.Watch.Domain.Entities.Client
     /// <summary>
     /// Representa o canal de comunicação WhatsApp.
     /// </summary>
-    public class EffectiveWhastApp : EffectiveChannel { }
+    public class EffectiveWhatsApp : EffectiveChannel { }
 
     /// <summary>
     /// Representa o canal de API.

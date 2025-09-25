@@ -240,7 +240,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effwhatsapp
     public class LeadDocument
     {
         [BsonElement("TriggerId")]
-        public ObjectId TriggerId { get; set; }
+        public string TriggerId { get; set; }
 
         [BsonElement("Status")]
         public string Status { get; set; }

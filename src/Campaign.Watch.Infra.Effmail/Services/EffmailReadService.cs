@@ -1,9 +1,10 @@
 ﻿using Campaign.Watch.Domain.Entities.Read.Effmail;
 using Campaign.Watch.Domain.Interfaces.Services.Read.Effmail;
 using Campaign.Watch.Infra.Effmail.Factories;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Campaign.Watch.Infra.Effmail.Services
@@ -17,72 +18,79 @@ namespace Campaign.Watch.Infra.Effmail.Services
             _factory = factory;
         }
 
-        /// <summary>
-        /// Busca as triggers de Effmail associadas a um workflowId, 
-        /// agregando as estatísticas da collection de Leads de forma performática.
-        /// </summary>
-        /// <param name="dbName">O nome do banco de dados do cliente.</param>
-        /// <param name="workflowId">O ID do workflow a ser buscado.</param>
-        /// <returns>Uma coleção de entidades EffmailRead montadas com os dados da Trigger e as estatísticas dos Leads.</returns>
         public async Task<IEnumerable<EffmailRead>> GetTriggerEffmail(string dbName, string workflowId)
         {
-            // 1. Obtém a instância do banco de dados através da factory
+            if (workflowId == "99aa534b77ed5eccd4331934")
+            {
+                Console.WriteLine("Email encontrado");
+            }
             var database = _factory.GetDatabase(dbName);
             var triggerCollection = database.GetCollection<EffmailRead>("Trigger");
 
-            // 2. Constrói o Pipeline de Agregação do MongoDB
-            var pipeline = triggerCollection.Aggregate()
-                // ETAPA 1: Filtra ($match) as triggers pelo WorkflowId.
-                // É crucial ter um índice em "Parameters.WorkflowId" na collection Trigger para performance.
-                .Match(t => t.Parameters.WorkflowId == workflowId)
+            var pipeline = new BsonDocument[]
+            {
+                // ETAPA 1: Filtrar as triggers pelo WorkflowId
+                new BsonDocument("$match", new BsonDocument("Parameters.WorkflowId", workflowId)),
 
-                // ETAPA 2: Realiza a junção ($lookup) com a collection de Leads.
-                // Para cada trigger, busca os leads correspondentes e os agrupa em um array temporário.
-                .Lookup<EffmailRead, LeadDocument, EffmailRead>(
-                    foreignCollection: database.GetCollection<LeadDocument>("Lead"),
-                    localField: t => t.Id,
-                    foreignField: l => l.TriggerId,
-                    @as: (EffmailRead e) => e.Leads.Items
-                )
-
-                // ETAPA 3: Projeta ($project) o resultado final.
-                // Mapeia os campos da trigger e calcula as contagens de status dos leads.
-                .Project(trigger => new EffmailRead
+                // ETAPA 2: Realizar o $lookup com a sub-pipeline para contar os leads
+                new BsonDocument("$lookup", new BsonDocument
                 {
-                    // Mapeamento dos campos da Trigger
-                    Id = trigger.Id,
-                    Status = trigger.Status,
-                    Name = trigger.Name,
-                    AppointmentDate = trigger.AppointmentDate,
-                    StatusTrigger = trigger.StatusTrigger,
-                    Parameters = trigger.Parameters,
-                    IsTest = trigger.IsTest,
-                    ReplyTo = trigger.ReplyTo,
-                    CreatedAt = trigger.CreatedAt,
-                    ModifiedAt = trigger.ModifiedAt,
-                    TemplateId = trigger.TemplateId,
-                    SchedulerId = trigger.SchedulerId,
-                    Transactional = trigger.Transactional,
-                    WebhookEnabled = trigger.WebhookEnabled,
-                    ExistsExternalId = trigger.ExistsExternalId,
-                    WebhookAPIs = trigger.WebhookAPIs,
-                    File = trigger.File,
-                    Error = trigger.Error,
+                    { "from", "Lead" },
+                    { "let", new BsonDocument("trigger_id", "$_id") },
+                    { "pipeline", new BsonArray
+                        {
+                            new BsonDocument("$match", new BsonDocument("$expr",
+                                new BsonDocument("$eq", new BsonArray { "$TriggerId", new BsonDocument("$toString", "$$trigger_id") })
+                            )),
+                            new BsonDocument("$group", new BsonDocument
+                            {
+                                { "_id", "$LastStatus" },
+                                { "count", new BsonDocument("$sum", 1) }
+                            })
+                        }
+                    },
+                    { "as", "leadCounts" }
+                }),
 
-                    // Cálculo e montagem do objeto 'Leads' com as estatísticas
-                    Leads = new Leads
-                    {
-                        TriggerId = trigger.Id.ToString(),                        
-                        Success = trigger.Leads.Items.Count(lead => lead.LastStatus == "Success"),
-                        Error = trigger.Leads.Items.Count(lead => lead.LastStatus == "Error"),
-                        Blocked = trigger.Leads.Items.Count(lead => lead.LastStatus == "Blocked"),
-                        Optout = trigger.Leads.Items.Count(lead => lead.LastStatus == "Optout"),                        
-                        Deduplication = trigger.Leads.Items.Count(lead => lead.LastStatus == "Deduplication")
+                // ETAPA 3 (NOVA): Transformar o array de contagens em um objeto para acesso seguro
+                new BsonDocument("$addFields", new BsonDocument
+                {
+                    { "leadCountsObj", new BsonDocument("$arrayToObject",
+                        new BsonDocument("$map", new BsonDocument
+                            {
+                                { "input", "$leadCounts" },
+                                { "as", "item" },
+                                { "in", new BsonDocument { { "k", "$$item._id" }, { "v", "$$item.count" } } }
+                            }
+                        ))
                     }
-                });
+                }),
 
-            // 3. Executa a agregação e retorna a lista
-            return await pipeline.ToListAsync();
+                // ETAPA 4 (FINAL): Projetar o resultado final lendo do novo objeto
+                new BsonDocument("$project", new BsonDocument
+                {
+                    // Mantém todos os campos originais da Trigger
+                    { "_id", 1 }, { "Status", 1 }, { "Name", 1 }, { "AppointmentDate", 1 },
+                    { "StatusTrigger", 1 }, { "Parameters", 1 }, { "IsTest", 1 }, { "ReplyTo", 1 },
+                    { "CreatedAt", 1 }, { "ModifiedAt", 1 }, { "TemplateId", 1 }, { "SchedulerId", 1 },
+                    { "Transactional", 1 }, { "WebhookEnabled", 1 }, { "ExistsExternalId", 1 },
+                    { "WebhookAPIs", 1 }, { "File", 1 }, { "Error", 1 },
+
+                    // Cria o objeto Leads a partir do objeto de contagens, de forma segura
+                    { "Leads", new BsonDocument
+                        {
+                            { "Success", new BsonDocument("$ifNull", new BsonArray { "$leadCountsObj.Success", 0 }) },
+                            { "Error", new BsonDocument("$ifNull", new BsonArray { "$leadCountsObj.Error", 0 }) },
+                            { "Blocked", new BsonDocument("$ifNull", new BsonArray { "$leadCountsObj.Blocked", 0 }) },
+                            { "Optout", new BsonDocument("$ifNull", new BsonArray { "$leadCountsObj.Optout", 0 }) },
+                            { "Deduplication", new BsonDocument("$ifNull", new BsonArray { "$leadCountsObj.Deduplication", 0 }) }
+                        }
+                    }
+                })
+            };
+
+            var aggregation = await triggerCollection.Aggregate<EffmailRead>(pipeline).ToListAsync();
+            return aggregation;
         }
     }
 }
