@@ -23,11 +23,11 @@ jobs:
 
       # 3. Restaurar dependências
       - name: Restore dependencies
-        run: dotnet restore Campaign.Watch.sln
+        run: dotnet restore CampaignWatch.sln
 
       # 4. Build de toda a solution
       - name: Build solution
-        run: dotnet build Campaign.Watch.sln --configuration Release --no-restore
+        run: dotnet build CampaignWatch.sln --configuration Release --no-restore
 
       # 5. Rodar testes
       - name: Run tests
