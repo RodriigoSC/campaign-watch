@@ -43,13 +43,13 @@ jobs:
 
       # 8. Upload artefatos (opcional, útil para outro job de deploy)
       - name: Upload API artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: api-publish
           path: ./publish/api
 
       - name: Upload Worker artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: worker-channels-publish
           path: ./publish/worker-channels
