@@ -88,7 +88,7 @@ namespace Campaign.Watch.Application.Services.Worker
 
                 foreach (var campanhaOrigem in campanhasOrigem)
                 {
-                    var campanhaExistente = await _campaignApplication.GetCampaignByIdCampaignAsync(cliente.Name, campanhaOrigem.Id);
+                    var campanhaExistente = await _campaignApplication.ObterCampanhaPorIdCampanhaAsync(cliente.Name, campanhaOrigem.Id);
                     if (campanhaExistente == null)
                     {
                         _logger.LogInformation("Nova campanha encontrada na origem: '{CampaignName}'. Sincronizando.", campanhaOrigem.Name);
@@ -104,7 +104,7 @@ namespace Campaign.Watch.Application.Services.Worker
         /// </summary>
         private async Task MonitorarCampanhasPendentesAsync()
         {
-            var campanhasParaProcessar = await _campaignApplication.GetCampaignsDueForMonitoringAsync();
+            var campanhasParaProcessar = await _campaignApplication.ObterCampanhasParaMonitorarAsync();
             if (!campanhasParaProcessar.Any())
             {
                 _logger.LogInformation("Nenhuma campanha pendente de monitoramento encontrada.");
@@ -169,7 +169,7 @@ namespace Campaign.Watch.Application.Services.Worker
         private async Task SalvarOuAtualizarCampanhaAsync(CampaignEntity campaign, CampaignType tipoCampanha)
         {
             // Busca o registro existente para obter o ObjectId, se houver.
-            var campanhaExistente = await _campaignApplication.GetCampaignByIdCampaignAsync(campaign.ClientName, campaign.IdCampaign);
+            var campanhaExistente = await _campaignApplication.ObterCampanhaPorIdCampanhaAsync(campaign.ClientName, campaign.IdCampaign);
             var agora = DateTime.UtcNow;
 
             campaign.LastCheckMonitoring = agora;
@@ -184,7 +184,7 @@ namespace Campaign.Watch.Application.Services.Worker
             _logger.LogInformation("Persistindo campanha (Upsert) com IdCampaign: {IdCampaign}", campaign.IdCampaign);
 
             // Chamamos diretamente o Update, que agora fará o Upsert.
-            await _campaignApplication.UpdateCampaignAsync(objectIdParaAtualizar, campaignDto);
+            await _campaignApplication.AtualizarCampanhaAsync(objectIdParaAtualizar, campaignDto);
 
             _logger.LogInformation(
                 "Campanha persistida com sucesso. Status de monitoramento: {MonitoringStatus}",

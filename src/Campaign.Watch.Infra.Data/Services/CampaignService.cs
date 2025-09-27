@@ -10,33 +10,18 @@ using System.Threading.Tasks;
 
 namespace Campaign.Watch.Infra.Data.Services
 {
-    /// <summary>
-    /// Implementação do serviço de campanhas, contendo as regras de negócio para operações de campanha.
-    /// </summary>
     public class CampaignService : ICampaignService
     {
         private readonly ICampaignRepository _campaignRepository;
         private readonly IClientRepository _clientRepository;
 
-        /// <summary>
-        /// Inicializa uma nova instância da classe CampaignService.
-        /// </summary>
-        /// <param name="campaignRepository">O repositório de campanhas para acesso aos dados.</param>
-        /// <param name="clientRepository">O repositório de clientes para validações.</param>
         public CampaignService(ICampaignRepository campaignRepository, IClientRepository clientRepository)
         {
             _campaignRepository = campaignRepository;
             _clientRepository = clientRepository;
         }
 
-        /// <summary>
-        /// Cria uma nova campanha após validar se o cliente associado existe e está ativo.
-        /// </summary>
-        /// <param name="entity">A entidade da campanha a ser criada.</param>
-        /// <returns>A entidade da campanha após a criação.</returns>
-        /// <exception cref="ArgumentException">Lançada se o cliente especificado na entidade não for encontrado.</exception>
-        /// <exception cref="InvalidOperationException">Lançada se for tentado criar uma campanha para um cliente inativo.</exception>
-        public async Task<CampaignEntity> CreateCampaignAsync(CampaignEntity entity)
+        public async Task<CampaignEntity> CriarCampanhaAsync(CampaignEntity entity)
         {
             var client = await _clientRepository.GetByNameAsync(entity.ClientName);
             if (client == null)
@@ -48,17 +33,10 @@ namespace Campaign.Watch.Infra.Data.Services
                 throw new InvalidOperationException($"Não é possível criar campanhas para um cliente inativo.");
             }
 
-            return await _campaignRepository.CreateCampaignAsync(entity);
+            return await _campaignRepository.CriarCampanhaAsync(entity);
         }
 
-        /// <summary>
-        /// Atualiza uma campanha existente após validar se o cliente associado existe.
-        /// </summary>
-        /// <param name="id">O ObjectId da campanha a ser atualizada.</param>
-        /// <param name="entity">A entidade com os dados atualizados.</param>
-        /// <returns>Retorna true se a atualização foi bem-sucedida, caso contrário, false.</returns>
-        /// <exception cref="ArgumentException">Lançada se o cliente especificado na entidade não for encontrado.</exception>
-        public async Task<bool> UpdateCampaignAsync(ObjectId id, CampaignEntity entity)
+        public async Task<bool> AtualizarCampanhaAsync(ObjectId id, CampaignEntity entity)
         {
             var client = await _clientRepository.GetByNameAsync(entity.ClientName);
             if (client == null)
@@ -68,103 +46,92 @@ namespace Campaign.Watch.Infra.Data.Services
 
             entity.Id = id;
 
-            return await _campaignRepository.UpdateCampaignAsync(id, entity);
+            return await _campaignRepository.AtualizarCampanhaAsync(id, entity);
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetAllCampaignsAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterTodasAsCampanhasAsync()
         {
-            return await _campaignRepository.GetAllCampaignsAsync();
+            return await _campaignRepository.ObterTodasAsCampanhasAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetAllCampaignsByClientAsync(string clientName)
+        public async Task<IEnumerable<CampaignEntity>> ObterTodasAsCampanhasPorClienteAsync(string nomeCliente)
         {
-            return await _campaignRepository.GetAllCampaignsByClientAsync(clientName);
+            return await _campaignRepository.ObterTodasAsCampanhasPorClienteAsync(nomeCliente);
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetAllCampaignsByDateAsync(DateTime start, DateTime finish)
+        public async Task<IEnumerable<CampaignEntity>> ObterTodasAsCampanhasPorDataAsync(DateTime inicio, DateTime fim)
         {
-            return await _campaignRepository.GetAllCampaignsByDateAsync(start, finish);
+            return await _campaignRepository.ObterTodasAsCampanhasPorDataAsync(inicio, fim);
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetAllCampaignsByClientOrDateAsync(string clientName, DateTime start, DateTime finish)
+        public async Task<IEnumerable<CampaignEntity>> ObterTodasAsCampanhasPorClienteOuDataAsync(string nomeCliente, DateTime inicio, DateTime fim)
         {
-            return await _campaignRepository.GetAllCampaignsByClientOrDateAsync(clientName, start, finish);
+            return await _campaignRepository.ObterTodasAsCampanhasPorClienteOuDataAsync(nomeCliente, inicio, fim);
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByIdAsync(ObjectId id)
+        public async Task<CampaignEntity> ObterCampanhaPorIdAsync(ObjectId id)
         {
-            return await _campaignRepository.GetCampaignByIdAsync(id);
+            return await _campaignRepository.ObterCampanhaPorIdAsync(id);
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByNameAsync(string campaignName)
+        public async Task<CampaignEntity> ObterCampanhaPorNomeAsync(string nomeCampanha)
         {
-            return await _campaignRepository.GetCampaignByNameAsync(campaignName);
+            return await _campaignRepository.ObterCampanhaPorNomeAsync(nomeCampanha);
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByNumberAsync(long campaignNumber)
+        public async Task<CampaignEntity> ObterCampanhaPorNumeroAsync(long numeroCampanha)
         {
-            return await _campaignRepository.GetCampaignByNumberAsync(campaignNumber);
+            return await _campaignRepository.ObterCampanhaPorNumeroAsync(numeroCampanha);
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetActiveCampaignsAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasAtivasAsync()
         {
-            return await _campaignRepository.GetActiveCampaignsAsync();
+            return await _campaignRepository.ObterCampanhasAtivasAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsByStatusAsync(CampaignStatus statusCampaign)
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasPorStatusAsync(CampaignStatus statusCampanha)
         {
-            return await _campaignRepository.GetCampaignsByStatusAsync(statusCampaign);
+            return await _campaignRepository.ObterCampanhasPorStatusAsync(statusCampanha);
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsPaginatedAsync(int page, int pageSize)
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasPaginadasAsync(int pagina, int tamanhoPagina)
         {
-            return await _campaignRepository.GetCampaignsPaginatedAsync(page, pageSize);
+            return await _campaignRepository.ObterCampanhasPaginadasAsync(pagina, tamanhoPagina);
         }
 
-        /// <inheritdoc />
-        public async Task<int> CountCampaignsByClientAsync(string clientName)
+        public async Task<int> ContarCampanhasPorClienteAsync(string nomeCliente)
         {
-            return await _campaignRepository.CountCampaignsByClientAsync(clientName);
+            return await _campaignRepository.ContarCampanhasPorClienteAsync(nomeCliente);
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByIdCampaignAsync(string clientName, string idCampaign)
+        public async Task<CampaignEntity> ObterCampanhaPorIdCampanhaAsync(string nomeCliente, string idCampanha)
         {
-            return await _campaignRepository.GetCampaignByIdCampaignAsync(clientName, idCampaign);
+            return await _campaignRepository.ObterCampanhaPorIdCampanhaAsync(nomeCliente, idCampanha);
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsDueForMonitoringAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasParaMonitorarAsync()
         {
-            return await _campaignRepository.GetCampaignsDueForMonitoringAsync();
+            return await _campaignRepository.ObterCampanhasParaMonitorarAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsWithIntegrationErrorsAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasComErrosDeIntegracaoAsync()
         {
-            return await _campaignRepository.GetCampaignsWithIntegrationErrorsAsync();
+            return await _campaignRepository.ObterCampanhasComErrosDeIntegracaoAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsWithDelayedExecutionAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasComExecucaoAtrasadaAsync()
         {
-            return await _campaignRepository.GetCampaignsWithDelayedExecutionAsync();
+            return await _campaignRepository.ObterCampanhasComExecucaoAtrasadaAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetSuccessfullyMonitoredCampaignsAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasMonitoradasComSucessoAsync()
         {
-            return await _campaignRepository.GetSuccessfullyMonitoredCampaignsAsync();
+            return await _campaignRepository.ObterCampanhasMonitoradasComSucessoAsync();
+        }
+
+        public async Task<IEnumerable<CampaignStatusCount>> ObterContagemStatusCampanhaAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim)
+        {
+            return await _campaignRepository.ObterContagemDeStatusAsync(nomeCliente, dataInicio, dataFim);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime ModifiedAt { get; set; }
-        public CampaignStatusResponse StatusCampaign { get; set; }
+        public string StatusCampaign { get; set; }
         public string MonitoringStatus { get; set; }
         public DateTime? NextExecutionMonitoring { get; set; }
         public DateTime? LastCheckMonitoring { get; set; }

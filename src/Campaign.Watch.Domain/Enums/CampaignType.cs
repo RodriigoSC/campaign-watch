@@ -10,11 +10,13 @@ namespace Campaign.Watch.Domain.Enums
         /// <summary>
         /// A campanha é executada apenas uma vez.
         /// </summary>
-        [Description("Pontual")] Pontual = 0,
+        [Description("Pontual")] 
+        Pontual = 0,
 
         /// <summary>
         /// A campanha é executada repetidamente, com base em um agendamento.
         /// </summary>
-        [Description("Recorrente")] Recorrente = 1
+        [Description("Recorrente")] 
+        Recorrente = 1
     }
 }

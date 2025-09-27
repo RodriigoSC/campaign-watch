@@ -10,26 +10,31 @@ namespace Campaign.Watch.Domain.Enums
         /// <summary>
         /// Canal de E-mail.
         /// </summary>
-        [Description("EffectiveMail")] EffectiveMail = 1,
+        [Description("EffectiveMail")] 
+        EffectiveMail = 1,
 
         /// <summary>
         /// Canal de SMS (Short Message Service).
         /// </summary>
-        [Description("EffectiveSms")] EffectiveSms = 2,
+        [Description("EffectiveSms")] 
+        EffectiveSms = 2,
 
         /// <summary>
         /// Canal de  Push.
         /// </summary>
-        [Description("EffectivePush")] EffectivePush = 3,
+        [Description("EffectivePush")] 
+        EffectivePush = 3,
 
         /// <summary>
         /// Canal de WhatsApp.
         /// </summary>
-        [Description("EffectiveWhatsApp")] EffectiveWhatsApp = 5,
+        [Description("EffectiveWhatsApp")] 
+        EffectiveWhatsApp = 5,
 
         /// <summary>
         /// Canal de API.
         /// </summary>       
-        [Description("EffectiveApi")] EffectiveApi = 6
+        [Description("EffectiveApi")]
+        EffectiveApi = 6
     }
 }

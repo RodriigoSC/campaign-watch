@@ -1,5 +1,6 @@
 ﻿using Campaign.Watch.Application.Dtos.Campaign;
 using Campaign.Watch.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,20 +10,21 @@ namespace Campaign.Watch.Application.Interfaces.Campaign
     {
         #region Banco de persistência
 
-        Task<CampaignDetailResponse> CreateCampaignAsync(CampaignDetailResponse dto);
-        Task<bool> UpdateCampaignAsync(string id, CampaignDetailResponse dto);
-        Task<IEnumerable<CampaignDetailResponse>> GetAllCampaignsAsync();
-        Task<CampaignDetailResponse> GetCampaignByIdAsync(string id);
-        Task<CampaignDetailResponse> GetCampaignByNameAsync(string campaignName);
-        Task<CampaignDetailResponse> GetCampaignByNumberAsync(long campaignNumber);
-        Task<IEnumerable<CampaignDetailResponse>> GetAllCampaignsByClientAsync(string clientName);
-        Task<IEnumerable<CampaignStatusResponse>> GetCampaignsByStatusAsync(CampaignStatus status);
-        Task<IEnumerable<CampaignDetailResponse>> GetCampaignsPaginatedAsync(int page, int pageSize);
-        Task<CampaignDetailResponse> GetCampaignByIdCampaignAsync(string clientName, string idCampaign);
-        Task<IEnumerable<CampaignDetailResponse>> GetCampaignsDueForMonitoringAsync();
-        Task<IEnumerable<CampaignDetailResponse>> GetCampaignsWithIntegrationErrorsAsync();
-        Task<IEnumerable<CampaignDetailResponse>> GetCampaignsWithDelayedExecutionAsync();
-        Task<IEnumerable<CampaignDetailResponse>> GetSuccessfullyMonitoredCampaignsAsync();
+        Task<CampaignDetailResponse> CriarCampanhaAsync(CampaignDetailResponse dto);
+        Task<bool> AtualizarCampanhaAsync(string id, CampaignDetailResponse dto);
+        Task<IEnumerable<CampaignDetailResponse>> ObterTodasAsCampanhasAsync();
+        Task<CampaignDetailResponse> ObterCampanhaPorIdAsync(string id);
+        Task<CampaignDetailResponse> ObterCampanhaPorNomeAsync(string nomeCampanha);
+        Task<CampaignDetailResponse> ObterCampanhaPorNumeroAsync(long numeroCampanha);
+        Task<IEnumerable<CampaignDetailResponse>> ObterTodasAsCampanhasPorClienteAsync(string nomeCliente);
+        Task<IEnumerable<CampaignStatusResponse>> ObterCampanhasPorStatusAsync(CampaignStatus status);
+        Task<IEnumerable<CampaignDetailResponse>> ObterCampanhasPaginadasAsync(int pagina, int tamanhoPagina);
+        Task<CampaignDetailResponse> ObterCampanhaPorIdCampanhaAsync(string nomeCliente, string idCampanha);
+        Task<IEnumerable<CampaignDetailResponse>> ObterCampanhasParaMonitorarAsync();
+        Task<IEnumerable<CampaignErrorResponse>> ObterCampanhasComErrosDeIntegracaoAsync();
+        Task<IEnumerable<CampaignDelayedResponse>> ObterCampanhasComExecucaoAtrasadaAsync();
+        Task<IEnumerable<CampaignStatusResponse>> ObterCampanhasMonitoradasComSucessoAsync();
+        Task<IEnumerable<CampaignStatusCountResponse>> ObterContagemStatusCampanhaAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim);
 
         #endregion
     }

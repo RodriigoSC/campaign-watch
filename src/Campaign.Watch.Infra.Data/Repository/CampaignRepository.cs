@@ -7,20 +7,13 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Campaign.Watch.Infra.Data.Repository
 {
-    /// <summary>
-    /// Repositório para gerenciar as operações de dados da entidade CampaignEntity.
-    /// </summary>
     public class CampaignRepository : CommonRepository<CampaignEntity>, ICampaignRepository
     {
-        /// <summary>
-        /// Inicializa uma nova instância da classe CampaignRepository.
-        /// Configura a coleção "CampaignMonitoring" e garante a criação de um índice único para o nome da campanha.
-        /// </summary>
-        /// <param name="persistenceFactory">A fábrica para obter a instância do banco de dados.</param>        
         public CampaignRepository(IPersistenceMongoFactory persistenceFactory) : base(persistenceFactory, "CampaignMonitoring")
         {
             var uniqueIndexKeys = Builders<CampaignEntity>.IndexKeys
@@ -30,7 +23,7 @@ namespace Campaign.Watch.Infra.Data.Repository
                 uniqueIndexKeys,
                 new CreateIndexOptions { Unique = true, Name = "Client_IdCampaign_Unique" });
 
-            
+
             var workerIndexKeys = Builders<CampaignEntity>.IndexKeys
                 .Ascending(x => x.IsActive)
                 .Ascending(x => x.NextExecutionMonitoring);
@@ -41,113 +34,94 @@ namespace Campaign.Watch.Infra.Data.Repository
             CreateIndexesAsync(new List<CreateIndexModel<CampaignEntity>> { uniqueIndexModel, workerIndexModel }).GetAwaiter().GetResult();
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> CreateCampaignAsync(CampaignEntity entity)
+        public async Task<CampaignEntity> CriarCampanhaAsync(CampaignEntity entity)
         {
             await _collection.InsertOneAsync(entity);
             return entity;
         }
 
-        /// <inheritdoc />
-        public async Task<bool> UpdateCampaignAsync(ObjectId id, CampaignEntity entity)
+        public async Task<bool> AtualizarCampanhaAsync(ObjectId id, CampaignEntity entity)
         {
             var filter = Builders<CampaignEntity>.Filter.Eq(c => c.IdCampaign, entity.IdCampaign);
             var result = await _collection.ReplaceOneAsync(filter, entity, new ReplaceOptions { IsUpsert = true });
             return result.IsAcknowledged && (result.ModifiedCount > 0 || result.UpsertedId != null);
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByIdAsync(ObjectId id)
+        public async Task<CampaignEntity> ObterCampanhaPorIdAsync(ObjectId id)
         {
             return await _collection.Find(c => c.Id == id).FirstOrDefaultAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetAllCampaignsAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterTodasAsCampanhasAsync()
         {
             return await _collection.Find(FilterDefinition<CampaignEntity>.Empty).ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetAllCampaignsByClientAsync(string clientName)
+        public async Task<IEnumerable<CampaignEntity>> ObterTodasAsCampanhasPorClienteAsync(string nomeCliente)
         {
-            return await _collection.Find(c => c.ClientName == clientName).ToListAsync();
+            return await _collection.Find(c => c.ClientName == nomeCliente).ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetAllCampaignsByDateAsync(DateTime start, DateTime finish)
+        public async Task<IEnumerable<CampaignEntity>> ObterTodasAsCampanhasPorDataAsync(DateTime inicio, DateTime fim)
         {
-            var filter = Builders<CampaignEntity>.Filter.Gte(c => c.CreatedAt, start) &
-                         Builders<CampaignEntity>.Filter.Lte(c => c.CreatedAt, finish);
+            var filter = Builders<CampaignEntity>.Filter.Gte(c => c.CreatedAt, inicio) &
+                         Builders<CampaignEntity>.Filter.Lte(c => c.CreatedAt, fim);
             return await _collection.Find(filter).ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetAllCampaignsByClientOrDateAsync(string clientName, DateTime start, DateTime finish)
+        public async Task<IEnumerable<CampaignEntity>> ObterTodasAsCampanhasPorClienteOuDataAsync(string nomeCliente, DateTime inicio, DateTime fim)
         {
             var filter = Builders<CampaignEntity>.Filter.And(
-                Builders<CampaignEntity>.Filter.Eq(c => c.ClientName, clientName),
-                Builders<CampaignEntity>.Filter.Gte(c => c.CreatedAt, start),
-                Builders<CampaignEntity>.Filter.Lte(c => c.CreatedAt, finish)
+                Builders<CampaignEntity>.Filter.Eq(c => c.ClientName, nomeCliente),
+                Builders<CampaignEntity>.Filter.Gte(c => c.CreatedAt, inicio),
+                Builders<CampaignEntity>.Filter.Lte(c => c.CreatedAt, fim)
             );
             return await _collection.Find(filter).ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetActiveCampaignsAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasAtivasAsync()
         {
             return await _collection.Find(c => c.IsActive == true).ToListAsync();
         }
 
-        /// <summary>
-        /// Obtém todas as campanhas com um status específico.
-        /// </summary>
-        /// <param name="statusCampaign">O status da campanha para filtrar.</param>
-        /// <returns>Uma coleção de campanhas com o status especificado.</returns>
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsByStatusAsync(CampaignStatus statusCampaign)
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasPorStatusAsync(CampaignStatus statusCampanha)
         {
-            return await _collection.Find(c => c.StatusCampaign == statusCampaign).ToListAsync();
+            return await _collection.Find(c => c.StatusCampaign == statusCampanha).ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<int> CountCampaignsByClientAsync(string clientName)
+        public async Task<int> ContarCampanhasPorClienteAsync(string nomeCliente)
         {
-            return (int)await _collection.CountDocumentsAsync(c => c.ClientName == clientName);
+            return (int)await _collection.CountDocumentsAsync(c => c.ClientName == nomeCliente);
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsPaginatedAsync(int page, int pageSize)
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasPaginadasAsync(int pagina, int tamanhoPagina)
         {
             return await _collection.Find(FilterDefinition<CampaignEntity>.Empty)
-                                      .Skip((page - 1) * pageSize)
-                                      .Limit(pageSize)
+                                      .Skip((pagina - 1) * tamanhoPagina)
+                                      .Limit(tamanhoPagina)
                                       .ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByNameAsync(string campaignName)
+        public async Task<CampaignEntity> ObterCampanhaPorNomeAsync(string nomeCampanha)
         {
-            return await _collection.Find(c => c.Name == campaignName).FirstOrDefaultAsync();
+            return await _collection.Find(c => c.Name == nomeCampanha).FirstOrDefaultAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByNumberAsync(long campaignNumber)
+        public async Task<CampaignEntity> ObterCampanhaPorNumeroAsync(long numeroCampanha)
         {
-            return await _collection.Find(c => c.NumberId == campaignNumber).FirstOrDefaultAsync();
+            return await _collection.Find(c => c.NumberId == numeroCampanha).FirstOrDefaultAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<CampaignEntity> GetCampaignByIdCampaignAsync(string clientName, string idCampaign)
+        public async Task<CampaignEntity> ObterCampanhaPorIdCampanhaAsync(string nomeCliente, string idCampanha)
         {
             var filter = Builders<CampaignEntity>.Filter.And(
-                Builders<CampaignEntity>.Filter.Eq(c => c.ClientName, clientName),
-                Builders<CampaignEntity>.Filter.Eq(c => c.IdCampaign, idCampaign)
+                Builders<CampaignEntity>.Filter.Eq(c => c.ClientName, nomeCliente),
+                Builders<CampaignEntity>.Filter.Eq(c => c.IdCampaign, idCampanha)
             );
             return await _collection.Find(filter).FirstOrDefaultAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsDueForMonitoringAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasParaMonitorarAsync()
         {
             var now = DateTime.UtcNow;
 
@@ -155,26 +129,58 @@ namespace Campaign.Watch.Infra.Data.Repository
                 Builders<CampaignEntity>.Filter.Eq(c => c.IsActive, true),
                 Builders<CampaignEntity>.Filter.Lte(c => c.NextExecutionMonitoring, now)
             );
-            
+
             return await _collection.Find(filter).ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsWithIntegrationErrorsAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasComErrosDeIntegracaoAsync()
         {
             return await _collection.Find(c => c.HealthStatus.HasIntegrationErrors == true).ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetCampaignsWithDelayedExecutionAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasComExecucaoAtrasadaAsync()
         {
             return await _collection.Find(c => c.MonitoringStatus == MonitoringStatus.ExecutionDelayed).ToListAsync();
         }
 
-        /// <inheritdoc />
-        public async Task<IEnumerable<CampaignEntity>> GetSuccessfullyMonitoredCampaignsAsync()
+        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasMonitoradasComSucessoAsync()
         {
             return await _collection.Find(c => c.MonitoringStatus == MonitoringStatus.Completed || c.MonitoringStatus == MonitoringStatus.WaitingForNextExecution).ToListAsync();
+        }
+
+        public async Task<IEnumerable<CampaignStatusCount>> ObterContagemDeStatusAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim)
+        {
+            var filterBuilder = Builders<CampaignEntity>.Filter;
+            var matchFilter = filterBuilder.Empty;
+
+            if (!string.IsNullOrWhiteSpace(nomeCliente))
+            {
+                matchFilter &= filterBuilder.Eq(c => c.ClientName, nomeCliente);
+            }
+
+            if (dataInicio.HasValue)
+            {
+                matchFilter &= filterBuilder.Gte(c => c.CreatedAt, dataInicio.Value.Date);
+            }
+
+            if (dataFim.HasValue)
+            {
+                matchFilter &= filterBuilder.Lt(c => c.CreatedAt, dataFim.Value.Date.AddDays(1));
+            }
+
+            var aggregation = await _collection.Aggregate()
+                .Match(matchFilter)
+                .Group(
+                    key => key.MonitoringStatus,
+                    group => new CampaignStatusCount
+                    {
+                        Status = group.Key,
+                        Count = group.Sum(c => 1)
+                    })
+                .SortBy(g => g.Status)
+                .ToListAsync();
+
+            return aggregation;
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Campaign.Watch.Application.Resolver
             services.AddScoped<ICampaignDataProcessor, CampaignDataProcessor>();
 
             services.AddAutoMapper(typeof(ClientMapper));
-            services.AddAutoMapper(typeof(CampaignMapper));
+            services.AddAutoMapper(typeof(CampaignProfile));
 
             return services;
         }
