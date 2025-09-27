@@ -120,5 +120,23 @@ namespace Campaign.Watch.Domain.Interfaces.Repositories.Campaign
         /// </summary>
         /// <returns>Uma coleção de campanhas que precisam de atenção.</returns>
         Task<IEnumerable<CampaignEntity>> GetCampaignsDueForMonitoringAsync();
+
+        /// <summary>
+        /// Obtém todas as campanhas com erro de integração.
+        /// </summary>
+        /// <returns>Uma coleção de campanhas com erro de integração.</returns>
+        Task<IEnumerable<CampaignEntity>> GetCampaignsWithIntegrationErrorsAsync();
+
+        /// <summary>
+        /// Obtém todas as campanhas com execução atrasada.
+        /// </summary>
+        /// <returns>Uma coleção de campanhas com execução atrasada.</returns>
+        Task<IEnumerable<CampaignEntity>> GetCampaignsWithDelayedExecutionAsync();
+
+        /// <summary>
+        /// Obtém todas as campanhas monitoradas com sucesso.
+        /// </summary>
+        /// <returns>Uma coleção de campanhas monitoradas com sucesso.</returns>
+        Task<IEnumerable<CampaignEntity>> GetSuccessfullyMonitoredCampaignsAsync();
     }
 }

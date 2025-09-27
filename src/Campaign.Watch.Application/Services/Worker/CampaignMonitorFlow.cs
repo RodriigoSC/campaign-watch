@@ -179,7 +179,7 @@ namespace Campaign.Watch.Application.Services.Worker
             var objectIdParaAtualizar = campanhaExistente?.Id ?? ObjectId.GenerateNewId().ToString();
 
             // Mapeia a entidade atualizada para o DTO que o serviço de aplicação espera.
-            var campaignDto = _mapper.Map<CampaignResponse>(campaign);
+            var campaignDto = _mapper.Map<CampaignDetailResponse>(campaign);
 
             _logger.LogInformation("Persistindo campanha (Upsert) com IdCampaign: {IdCampaign}", campaign.IdCampaign);
 

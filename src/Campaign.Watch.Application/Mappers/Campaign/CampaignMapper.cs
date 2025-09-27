@@ -17,7 +17,9 @@ namespace Campaign.Watch.Application.Mappers.Campaign
         public CampaignMapper()
         {
             // === MAPEAMENTOS DE DOMÍNIO PARA DTO (IDA) ===
-            CreateMap<CampaignEntity, CampaignResponse>();
+            CreateMap<CampaignEntity, CampaignSummaryResponse>();
+            CreateMap<CampaignEntity, CampaignDetailResponse>();
+
             CreateMap<MonitoringHealthStatus, MonitoringHealthStatusDto>();
             CreateMap<Scheduler, SchedulerResponse>();
             CreateMap<Execution, ExecutionResponse>();
@@ -37,7 +39,7 @@ namespace Campaign.Watch.Application.Mappers.Campaign
             CreateMap<WhatsAppIntegrationData, WhatsAppIntegrationDataResponse>();
 
             // === MAPEAMENTOS DE DTO PARA DOMÍNIO (VOLTA) ===
-            CreateMap<CampaignResponse, CampaignEntity>()
+            CreateMap<CampaignDetailResponse, CampaignEntity>()
                  .ForMember(dest => dest.Id, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.Id) ? ObjectId.Parse(src.Id) : ObjectId.Empty));
             CreateMap<MonitoringHealthStatusDto, MonitoringHealthStatus>();
             CreateMap<SchedulerResponse, Scheduler>();

@@ -148,5 +148,23 @@ namespace Campaign.Watch.Infra.Data.Services
         {
             return await _campaignRepository.GetCampaignsDueForMonitoringAsync();
         }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CampaignEntity>> GetCampaignsWithIntegrationErrorsAsync()
+        {
+            return await _campaignRepository.GetCampaignsWithIntegrationErrorsAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CampaignEntity>> GetCampaignsWithDelayedExecutionAsync()
+        {
+            return await _campaignRepository.GetCampaignsWithDelayedExecutionAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CampaignEntity>> GetSuccessfullyMonitoredCampaignsAsync()
+        {
+            return await _campaignRepository.GetSuccessfullyMonitoredCampaignsAsync();
+        }
     }
 }

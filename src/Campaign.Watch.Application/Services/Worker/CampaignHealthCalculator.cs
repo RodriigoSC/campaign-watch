@@ -30,7 +30,13 @@ namespace Campaign.Watch.Application.Services.Worker
         }
 
         private DateTime? CalcularProximaExecucao(CampaignEntity campaign, CampaignType tipoCampanha, DateTime now)
-        {
+        {            
+            // Se a campanha tem uma data de término e essa data já passou, não há próxima execução.
+            if (campaign.Scheduler?.EndDateTime.HasValue == true && now > campaign.Scheduler.EndDateTime.Value)
+            {
+                return null;
+            }
+
             if (tipoCampanha == CampaignType.Recurrent && campaign.Scheduler?.IsRecurrent == true && !string.IsNullOrWhiteSpace(campaign.Scheduler.Crontab))
             {
                 return SchedulerHelper.GetNextExecution(campaign.Scheduler.Crontab, now);
@@ -41,6 +47,9 @@ namespace Campaign.Watch.Application.Services.Worker
         private MonitoringHealthStatus CalcularStatusDeSaude(CampaignEntity campaign, CampaignType tipoCampanha, DateTime now)
         {
             var healthStatus = new MonitoringHealthStatus();
+            
+            healthStatus.IsFullyVerified = (campaign.Executions?.Any() == true) && (campaign.Executions.All(e => e.IsFullyVerifiedByMonitoring));
+
             var execucoesComErro = campaign.Executions?.Where(e => e.HasMonitoringErrors).ToList();
 
             healthStatus.HasIntegrationErrors = execucoesComErro?.Any() ?? false;
@@ -69,6 +78,18 @@ namespace Campaign.Watch.Application.Services.Worker
         {
             if (healthStatus.HasIntegrationErrors) return MonitoringStatus.Failed;
             if (healthStatus.HasPendingExecution) return MonitoringStatus.ExecutionDelayed;
+
+            // Verifica se a campanha recorrente já terminou
+            if (campaignType == CampaignType.Recurrent &&
+                campaign.Scheduler?.EndDateTime.HasValue == true &&
+                DateTime.UtcNow > campaign.Scheduler.EndDateTime.Value)
+            {
+                // Se a última execução foi concluída, então a campanha inteira está concluída.
+                if (campaign.StatusCampaign == CampaignStatus.Completed)
+                {
+                    return MonitoringStatus.Completed;
+                }
+            }
 
             switch (campaign.StatusCampaign)
             {

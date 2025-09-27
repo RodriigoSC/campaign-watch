@@ -158,5 +158,23 @@ namespace Campaign.Watch.Infra.Data.Repository
             
             return await _collection.Find(filter).ToListAsync();
         }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CampaignEntity>> GetCampaignsWithIntegrationErrorsAsync()
+        {
+            return await _collection.Find(c => c.HealthStatus.HasIntegrationErrors == true).ToListAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CampaignEntity>> GetCampaignsWithDelayedExecutionAsync()
+        {
+            return await _collection.Find(c => c.MonitoringStatus == MonitoringStatus.ExecutionDelayed).ToListAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<CampaignEntity>> GetSuccessfullyMonitoredCampaignsAsync()
+        {
+            return await _collection.Find(c => c.MonitoringStatus == MonitoringStatus.Completed || c.MonitoringStatus == MonitoringStatus.WaitingForNextExecution).ToListAsync();
+        }
     }
 }

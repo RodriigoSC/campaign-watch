@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Campaign.Watch.Application.Dtos.Campaign
 {
-    public class CampaignResponse
+    public class CampaignDetailResponse
     {
         public string Id { get; set; }
         public string ClientName { get; set; }
@@ -21,12 +21,7 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public MonitoringStatus MonitoringStatus { get; set; }
         public DateTime? NextExecutionMonitoring { get; set; }
         public DateTime? LastCheckMonitoring { get; set; }
-
-        /// <summary>
-        /// DTO contendo as flags de saúde do monitoramento da campanha.
-        /// </summary>
         public MonitoringHealthStatusDto HealthStatus { get; set; }
-
         public SchedulerResponse Scheduler { get; set; }
         public List<ExecutionResponse> Executions { get; set; }
     }
