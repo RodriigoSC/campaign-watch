@@ -74,12 +74,6 @@ namespace Campaign.Watch.Application.Services.Campaign
             return _mapper.Map<IEnumerable<CampaignDetailResponse>>(campaigns);
         }
 
-        public async Task<IEnumerable<CampaignStatusResponse>> ObterCampanhasPorStatusAsync(CampaignStatus status)
-        {
-            var campaigns = await _campaignService.ObterCampanhasPorStatusAsync(status);
-            return _mapper.Map<IEnumerable<CampaignStatusResponse>>(campaigns);
-        }
-
         public async Task<IEnumerable<CampaignDetailResponse>> ObterCampanhasPaginadasAsync(int pagina, int tamanhoPagina)
         {
             var campaigns = await _campaignService.ObterCampanhasPaginadasAsync(pagina, tamanhoPagina);
@@ -115,10 +109,17 @@ namespace Campaign.Watch.Application.Services.Campaign
             var campaigns = await _campaignService.ObterCampanhasMonitoradasComSucessoAsync();
             return _mapper.Map<IEnumerable<CampaignStatusResponse>>(campaigns);
         }
-        public async Task<IEnumerable<CampaignStatusCountResponse>> ObterContagemStatusCampanhaAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim)
+
+        public async Task<IEnumerable<CampaignStatusCountResponse>> ObterCampanhasPorStatusAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim)
         {
-            var counts = await _campaignService.ObterContagemStatusCampanhaAsync(nomeCliente, dataInicio, dataFim);
+            var counts = await _campaignService.ObterCampanhasPorStatusAsync(nomeCliente, dataInicio, dataFim);
             return _mapper.Map<IEnumerable<CampaignStatusCountResponse>>(counts);
+        }
+
+        public async Task<IEnumerable<CampaignStatusCountResponse>> ObterCampanhasPorStatusMonitoramentoAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim)
+        {
+            var campaigns = await _campaignService.ObterCampanhasPorStatusMonitoramentoAsync(nomeCliente, dataInicio, dataFim);
+            return _mapper.Map<IEnumerable<CampaignStatusCountResponse>>(campaigns);
         }
 
         #endregion

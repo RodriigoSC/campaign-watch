@@ -1,5 +1,4 @@
 ﻿using Campaign.Watch.Domain.Entities.Campaign;
-using Campaign.Watch.Domain.Enums;
 using Campaign.Watch.Domain.Interfaces.Repositories.Campaign;
 using Campaign.Watch.Domain.Interfaces.Repositories.Client;
 using Campaign.Watch.Domain.Interfaces.Services.Campaign;
@@ -89,11 +88,6 @@ namespace Campaign.Watch.Infra.Data.Services
             return await _campaignRepository.ObterCampanhasAtivasAsync();
         }
 
-        public async Task<IEnumerable<CampaignEntity>> ObterCampanhasPorStatusAsync(CampaignStatus statusCampanha)
-        {
-            return await _campaignRepository.ObterCampanhasPorStatusAsync(statusCampanha);
-        }
-
         public async Task<IEnumerable<CampaignEntity>> ObterCampanhasPaginadasAsync(int pagina, int tamanhoPagina)
         {
             return await _campaignRepository.ObterCampanhasPaginadasAsync(pagina, tamanhoPagina);
@@ -129,9 +123,14 @@ namespace Campaign.Watch.Infra.Data.Services
             return await _campaignRepository.ObterCampanhasMonitoradasComSucessoAsync();
         }
 
-        public async Task<IEnumerable<CampaignStatusCount>> ObterContagemStatusCampanhaAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim)
+        public async Task<IEnumerable<CampaignStatusCount>> ObterCampanhasPorStatusAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim)
         {
-            return await _campaignRepository.ObterContagemDeStatusAsync(nomeCliente, dataInicio, dataFim);
+            return await _campaignRepository.ObterCampanhasPorStatusAsync(nomeCliente, dataInicio, dataFim);
+        }
+
+        public async Task<IEnumerable<CampaignMonitoringStatusCount>> ObterCampanhasPorStatusMonitoramentoAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim)
+        {
+            return await _campaignRepository.ObterCampanhasPorStatusMonitoramentoAsync(nomeCliente, dataInicio, dataFim);
         }
     }
 }

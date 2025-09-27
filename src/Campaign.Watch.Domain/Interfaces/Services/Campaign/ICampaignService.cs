@@ -20,13 +20,14 @@ namespace Campaign.Watch.Domain.Interfaces.Services.Campaign
         Task<CampaignEntity> ObterCampanhaPorNumeroAsync(long numeroCampanha);
         Task<CampaignEntity> ObterCampanhaPorIdCampanhaAsync(string nomeCliente, string idCampanha);
         Task<IEnumerable<CampaignEntity>> ObterCampanhasAtivasAsync();
-        Task<IEnumerable<CampaignEntity>> ObterCampanhasPorStatusAsync(CampaignStatus statusCampanha);
         Task<IEnumerable<CampaignEntity>> ObterCampanhasPaginadasAsync(int pagina, int tamanhoPagina);
         Task<int> ContarCampanhasPorClienteAsync(string nomeCliente);
         Task<IEnumerable<CampaignEntity>> ObterCampanhasParaMonitorarAsync();
         Task<IEnumerable<CampaignEntity>> ObterCampanhasComErrosDeIntegracaoAsync();
         Task<IEnumerable<CampaignEntity>> ObterCampanhasComExecucaoAtrasadaAsync();
         Task<IEnumerable<CampaignEntity>> ObterCampanhasMonitoradasComSucessoAsync();
-        Task<IEnumerable<CampaignStatusCount>> ObterContagemStatusCampanhaAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim);
+
+        Task<IEnumerable<CampaignStatusCount>> ObterCampanhasPorStatusAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim);
+        Task<IEnumerable<CampaignMonitoringStatusCount>> ObterCampanhasPorStatusMonitoramentoAsync(string nomeCliente, DateTime? dataInicio, DateTime? dataFim);
     }
 }

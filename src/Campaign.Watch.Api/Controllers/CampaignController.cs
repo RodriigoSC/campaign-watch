@@ -83,17 +83,6 @@ namespace Campaign.Watch.Api.Controllers
         }
 
         /// <summary>
-        /// Obtém todas as campanhas com um status de monitoramento específico.
-        /// </summary>
-        [HttpGet("por-status/{status}")]
-        [ProducesResponseType(typeof(IEnumerable<CampaignStatusResponse>), 200)]
-        public async Task<IActionResult> ObterPorStatus(CampaignStatus status)
-        {
-            var campaigns = await _campaignApplication.ObterCampanhasPorStatusAsync(status);
-            return Ok(campaigns);
-        }
-
-        /// <summary>
         /// Obtém uma lista paginada de campanhas.
         /// </summary>
         [HttpGet("paginado")]
@@ -138,17 +127,33 @@ namespace Campaign.Watch.Api.Controllers
         }
 
         /// <summary>
-        /// Obtém a contagem de campanhas agrupadas por status.
+        /// Obtém a contagem de campanhas agrupadas por status de monitoramento.
         /// </summary>
-        [HttpGet("contagem-por-status")]
+        [HttpGet("contagem-por-status-monitoramento")]
         [ProducesResponseType(typeof(IEnumerable<CampaignStatusCountResponse>), 200)]
-        public async Task<IActionResult> ObterContagemPorStatus(
+        public async Task<IActionResult> ObterContagemPorStatusMonitoramento(
             [FromQuery] string nomeCliente,
             [FromQuery] DateTime? dataInicio,
             [FromQuery] DateTime? dataFim)
         {
-            var counts = await _campaignApplication.ObterContagemStatusCampanhaAsync(nomeCliente, dataInicio, dataFim);
+            var counts = await _campaignApplication.ObterCampanhasPorStatusMonitoramentoAsync(nomeCliente, dataInicio, dataFim);
             return Ok(counts);
         }
+
+        /// <summary>
+        /// Obtém a contagem de campanhas agrupadas por status da campanha (ex: Executando, Concluída).
+        /// </summary>
+        [HttpGet("contagem-por-status-campanha")]
+        [ProducesResponseType(typeof(IEnumerable<CampaignStatusCountResponse>), 200)]
+        public async Task<IActionResult> ObterContagemPorStatusCampanha(
+            [FromQuery] string nomeCliente,
+            [FromQuery] DateTime? dataInicio,
+            [FromQuery] DateTime? dataFim)
+        {
+            var counts = await _campaignApplication.ObterCampanhasPorStatusAsync(nomeCliente, dataInicio, dataFim);
+            return Ok(counts);
+        }
+
+
     }
 }

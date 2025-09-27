@@ -31,6 +31,9 @@ namespace Campaign.Watch.Application.Mappers.Campaign
             CreateMap<CampaignStatusCount, CampaignStatusCountResponse>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.GetDescription()));
 
+            CreateMap<CampaignMonitoringStatusCount, CampaignStatusCountResponse>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.GetDescription()));
+
             CreateMap<MonitoringHealthStatus, MonitoringHealthStatusDto>();
             CreateMap<Scheduler, SchedulerResponse>();
             CreateMap<Execution, ExecutionResponse>();

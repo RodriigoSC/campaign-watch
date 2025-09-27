@@ -7,7 +7,7 @@ namespace Campaign.Watch.Domain.Entities.Campaign
     /// </summary>
     public class CampaignStatusCount
     {
-        public MonitoringStatus Status { get; set; }
+        public CampaignStatus Status { get; set; }
         public int Count { get; set; }
     }
 }
