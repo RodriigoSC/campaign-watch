@@ -1,4 +1,6 @@
-﻿namespace Campaign.Watch.Domain.Enums
+﻿using System.ComponentModel;
+
+namespace Campaign.Watch.Domain.Enums
 {
     /// <summary>
     /// Define o tipo de execução de uma campanha.
@@ -8,11 +10,11 @@
         /// <summary>
         /// A campanha é executada apenas uma vez.
         /// </summary>
-        Single = 1,        
-       
+        [Description("Pontual")] Pontual = 0,
+
         /// <summary>
         /// A campanha é executada repetidamente, com base em um agendamento.
         /// </summary>
-        Recurrent = 2
+        [Description("Recorrente")] Recorrente = 1
     }
 }

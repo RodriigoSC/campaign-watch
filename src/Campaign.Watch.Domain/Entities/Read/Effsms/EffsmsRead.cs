@@ -77,6 +77,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effsms
         /// Indica se o sms é transacional.
         /// </summary>
         [BsonElement("Transactional")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool Transactional { get; set; }
 
 
@@ -87,6 +88,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effsms
         /// Indica se o webhook está habilitado para este gatilho.
         /// </summary>
         [BsonElement("WebhookEnabled")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool WebhookEnabled { get; set; }
 
         /// <summary>
@@ -221,6 +223,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effsms
         /// Indica se o processamento do arquivo foi concluído.
         /// </summary>
         [BsonElement("Completed")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool Completed { get; set; }
 
         /// <summary>

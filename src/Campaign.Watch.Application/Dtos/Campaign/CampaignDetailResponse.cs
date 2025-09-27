@@ -11,14 +11,14 @@ namespace Campaign.Watch.Application.Dtos.Campaign
         public string IdCampaign { get; set; }
         public long NumberId { get; set; }
         public string Name { get; set; }
-        public string TypeCampaign { get; set; }
+        public string CampaignType { get; set; }
         public string Description { get; set; }
         public string ProjectId { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime ModifiedAt { get; set; }
-        public CampaignStatus StatusCampaign { get; set; }
-        public MonitoringStatus MonitoringStatus { get; set; }
+        public CampaignStatusResponse StatusCampaign { get; set; }
+        public string MonitoringStatus { get; set; }
         public DateTime? NextExecutionMonitoring { get; set; }
         public DateTime? LastCheckMonitoring { get; set; }
         public MonitoringHealthStatusDto HealthStatus { get; set; }

@@ -25,8 +25,8 @@ namespace Campaign.Watch.Application.Services.Worker
         private CampaignType DeterminarTipoCampanha(CampaignEntity campaign)
         {
             return (campaign.Scheduler?.IsRecurrent == true || (campaign.Executions?.Count ?? 0) > 1)
-                ? CampaignType.Recurrent
-                : CampaignType.Single;
+                ? CampaignType.Recorrente
+                : CampaignType.Pontual;
         }
 
         private DateTime? CalcularProximaExecucao(CampaignEntity campaign, CampaignType tipoCampanha, DateTime now)
@@ -37,7 +37,7 @@ namespace Campaign.Watch.Application.Services.Worker
                 return null;
             }
 
-            if (tipoCampanha == CampaignType.Recurrent && campaign.Scheduler?.IsRecurrent == true && !string.IsNullOrWhiteSpace(campaign.Scheduler.Crontab))
+            if (tipoCampanha == CampaignType.Recorrente && campaign.Scheduler?.IsRecurrent == true && !string.IsNullOrWhiteSpace(campaign.Scheduler.Crontab))
             {
                 return SchedulerHelper.GetNextExecution(campaign.Scheduler.Crontab, now);
             }
@@ -80,7 +80,7 @@ namespace Campaign.Watch.Application.Services.Worker
             if (healthStatus.HasPendingExecution) return MonitoringStatus.ExecutionDelayed;
 
             // Verifica se a campanha recorrente já terminou
-            if (campaignType == CampaignType.Recurrent &&
+            if (campaignType == CampaignType.Recorrente &&
                 campaign.Scheduler?.EndDateTime.HasValue == true &&
                 DateTime.UtcNow > campaign.Scheduler.EndDateTime.Value)
             {
@@ -94,7 +94,7 @@ namespace Campaign.Watch.Application.Services.Worker
             switch (campaign.StatusCampaign)
             {
                 case CampaignStatus.Completed:
-                    if (campaignType == CampaignType.Recurrent)
+                    if (campaignType == CampaignType.Recorrente)
                         return MonitoringStatus.WaitingForNextExecution;
                     return healthStatus.IsFullyVerified ? MonitoringStatus.Completed : MonitoringStatus.InProgress;
 

@@ -2,6 +2,7 @@
 using Campaign.Watch.Application.Interfaces.Campaign;
 using Campaign.Watch.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -106,7 +107,7 @@ namespace Campaign.Watch.Api.Controllers
         /// <returns>Uma lista de campanhas que correspondem ao status.</returns>
         /// <response code="200">Retorna a lista de campanhas.</response>
         [HttpGet("by-status/{status}")]
-        [ProducesResponseType(typeof(IEnumerable<CampaignDetailResponse>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<CampaignStatusResponse>), 200)]
         public async Task<IActionResult> GetByStatus(CampaignStatus status)
         {
             var campaigns = await _campaignApplication.GetCampaignsByStatusAsync(status);
@@ -121,7 +122,7 @@ namespace Campaign.Watch.Api.Controllers
         /// <returns>Uma lista paginada de campanhas.</returns>
         /// <response code="200">Retorna a lista de campanhas para a página especificada.</response>
         [HttpGet("paginated")]
-        [ProducesResponseType(typeof(IEnumerable<CampaignSummaryResponse>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<CampaignDetailResponse>), 200)]
         public async Task<IActionResult> GetPaginated([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var campaigns = await _campaignApplication.GetCampaignsPaginatedAsync(page, pageSize);
@@ -134,7 +135,7 @@ namespace Campaign.Watch.Api.Controllers
         /// <returns>Uma lista de campanhas com erro de integração.</returns>
         /// <response code="200">Retorna a lista de campanhas.</response>
         [HttpGet("with-integration-errors")]
-        [ProducesResponseType(typeof(IEnumerable<CampaignSummaryResponse>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<CampaignDetailResponse>), 200)]
         public async Task<IActionResult> GetWithIntegrationErrors()
         {
             var campaigns = await _campaignApplication.GetCampaignsWithIntegrationErrorsAsync();
@@ -147,7 +148,7 @@ namespace Campaign.Watch.Api.Controllers
         /// <returns>Uma lista de campanhas com execução atrasada.</returns>
         /// <response code="200">Retorna a lista de campanhas.</response>
         [HttpGet("with-delayed-execution")]
-        [ProducesResponseType(typeof(IEnumerable<CampaignSummaryResponse>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<CampaignDetailResponse>), 200)]
         public async Task<IActionResult> GetWithDelayedExecution()
         {
             var campaigns = await _campaignApplication.GetCampaignsWithDelayedExecutionAsync();
@@ -164,6 +165,24 @@ namespace Campaign.Watch.Api.Controllers
         public async Task<IActionResult> GetSuccessfullyMonitored()
         {
             var campaigns = await _campaignApplication.GetSuccessfullyMonitoredCampaignsAsync();
+
+            // ----- INÍCIO DO CÓDIGO DE DEBUG -----
+            try
+            {
+                // Esta linha vai forçar o serializador a ler todos os dados,
+                // mas dentro de um try/catch para podermos inspecionar o erro.
+                var json = System.Text.Json.JsonSerializer.Serialize(campaigns);
+            }
+            catch (Exception ex)
+            {
+                // Se o código chegar aqui, a teoria está correta.
+                // Coloque um breakpoint (ponto de parada) na linha abaixo para
+                // inspecionar a variável 'ex'. A InnerException vai mostrar
+                // o erro de BsonString para BsonBoolean.
+                return BadRequest("Erro de serialização detectado: " + ex.ToString());
+            }
+            // ----- FIM DO CÓDIGO DE DEBUG -----
+
             return Ok(campaigns);
         }
     }

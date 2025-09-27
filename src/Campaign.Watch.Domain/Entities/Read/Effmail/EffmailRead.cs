@@ -53,6 +53,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effmail
         /// Indica se este é um disparo de teste.
         /// </summary>
         [BsonElement("IsTest")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsTest { get; set; }
 
         /// <summary>
@@ -89,18 +90,21 @@ namespace Campaign.Watch.Domain.Entities.Read.Effmail
         /// Indica se o e-mail é transacional.
         /// </summary>
         [BsonElement("Transactional")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool Transactional { get; set; }
 
         /// <summary>
         /// Indica se o webhook está habilitado para este gatilho.
         /// </summary>
         [BsonElement("WebhookEnabled")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool WebhookEnabled { get; set; }
 
         /// <summary>
         /// Indica se existe um ID externo associado.
         /// </summary>
         [BsonElement("ExistsExternalId")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool ExistsExternalId { get; set; }
 
         /// <summary>
@@ -235,6 +239,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effmail
         /// Indica se o processamento do arquivo foi concluído.
         /// </summary>
         [BsonElement("Completed")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool Completed { get; set; }
 
         /// <summary>

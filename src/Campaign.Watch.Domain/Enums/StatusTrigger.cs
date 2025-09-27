@@ -1,9 +1,11 @@
-﻿namespace Campaign.Watch.Domain.Enums
+﻿using System.ComponentModel;
+
+namespace Campaign.Watch.Domain.Enums
 {
     public enum StatusTrigger
     {
-        Concluded,
-        Scheduler,
-        Error
+        [Description("Concluído")] Concluded,
+        [Description("Agendado")] Scheduler,
+        [Description("Erro")] Error
     }
 }

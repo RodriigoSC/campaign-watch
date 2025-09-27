@@ -37,12 +37,14 @@ namespace Campaign.Watch.Domain.Entities.Read.Campaign
         public string Status { get; set; }
 
         [JsonPropertyName("IsCanceled")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsCanceled { get; set; }
 
         [JsonPropertyName("QueryExternal")]
         public string QueryExternal { get; set; }
 
         [JsonPropertyName("FlagCount")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool FlagCount { get; set; }
 
         [JsonPropertyName("WorkflowExecution")]

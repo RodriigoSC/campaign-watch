@@ -1,5 +1,6 @@
 ﻿using Campaign.Watch.Domain.Entities.Common;
 using Campaign.Watch.Domain.Enums;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
@@ -50,6 +51,8 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         /// <summary>
         /// Indica se a campanha está ativa.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsActive { get; set; }
 
         /// <summary>
@@ -90,11 +93,15 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         /// <summary>
         /// Flag que indica se a campanha foi logicamente deletada.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsDeleted { get; set; }
 
         /// <summary>
         /// Flag que indica se a campanha foi restaurada após ser deletada.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsRestored { get; set; }
 
         /// <summary>
@@ -116,16 +123,25 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         /// <summary>
         /// Indica se a campanha foi totalmente processada e verificada, incluindo todas as suas integrações.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
+
         public bool IsFullyVerified { get; set; }
 
         /// <summary>
         /// Flag que aponta se existe alguma execução que deveria ter rodado (baseado no agendamento) mas ainda não foi encontrada na origem.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
+
         public bool HasPendingExecution { get; set; }
 
         /// <summary>
         /// Flag geral que indica se há algum erro de integração em qualquer uma das execuções.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
+
         public bool HasIntegrationErrors { get; set; }
 
         /// <summary>
@@ -157,6 +173,9 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         /// <summary>
         /// Indica se a campanha é recorrente.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
+
         public bool IsRecurrent { get; set; }
 
         /// <summary>
@@ -198,11 +217,17 @@ namespace Campaign.Watch.Domain.Entities.Campaign
         /// <summary>
         /// Indica se todos os steps de canal dentro desta execução foram verificados e tiveram seus dados de integração populados pelo worker.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
+
         public bool IsFullyVerifiedByMonitoring { get; set; }
 
         /// <summary>
         /// Indica se algum erro foi detectado durante o monitoramento desta execução específica (ex: falha ao buscar dados de integração).
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
+
         public bool HasMonitoringErrors { get; set; }
 
         /// <summary>
@@ -275,6 +300,8 @@ namespace Campaign.Watch.Domain.Entities.Campaign
     [BsonKnownTypes(typeof(EmailIntegrationData), typeof(SmsIntegrationData), typeof(PushIntegrationData), typeof(WhatsAppIntegrationData))]
     public abstract class IntegrationDataBase
     {
+
+        public string? Raw { get; set; }
         /// <summary>
         /// Nome do canal de comunicação (ex: E-mail, SMS).
         /// </summary>

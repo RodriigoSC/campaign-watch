@@ -73,10 +73,10 @@ namespace Campaign.Watch.Application.Services.Campaign
             return _mapper.Map<IEnumerable<CampaignDetailResponse>>(campaigns);
         }
 
-        public async Task<IEnumerable<CampaignDetailResponse>> GetCampaignsByStatusAsync(CampaignStatus status)
+        public async Task<IEnumerable<CampaignStatusResponse>> GetCampaignsByStatusAsync(CampaignStatus status)
         {
             var campaigns = await _campaignService.GetCampaignsByStatusAsync(status);
-            return _mapper.Map<IEnumerable<CampaignDetailResponse>>(campaigns);
+            return _mapper.Map<IEnumerable<CampaignStatusResponse>>(campaigns);
         }
 
         public async Task<IEnumerable<CampaignDetailResponse>> GetCampaignsPaginatedAsync(int page, int pageSize)

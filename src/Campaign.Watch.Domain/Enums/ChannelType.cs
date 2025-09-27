@@ -1,4 +1,6 @@
-﻿namespace Campaign.Watch.Domain.Enums
+﻿using System.ComponentModel;
+
+namespace Campaign.Watch.Domain.Enums
 {
     /// <summary>
     /// Define os tipos de canais de comunicação disponíveis.
@@ -8,26 +10,26 @@
         /// <summary>
         /// Canal de E-mail.
         /// </summary>
-        EffectiveMail = 1,
+        [Description("EffectiveMail")] EffectiveMail = 1,
 
         /// <summary>
         /// Canal de SMS (Short Message Service).
         /// </summary>
-        EffectiveSms = 2,
+        [Description("EffectiveSms")] EffectiveSms = 2,
 
         /// <summary>
         /// Canal de  Push.
         /// </summary>
-        EffectivePush = 3,
+        [Description("EffectivePush")] EffectivePush = 3,
 
         /// <summary>
         /// Canal de WhatsApp.
         /// </summary>
-        EffectiveWhatsApp = 5,
+        [Description("EffectiveWhatsApp")] EffectiveWhatsApp = 5,
 
         /// <summary>
         /// Canal de API.
         /// </summary>       
-        EffectiveApi = 6
+        [Description("EffectiveApi")] EffectiveApi = 6
     }
 }

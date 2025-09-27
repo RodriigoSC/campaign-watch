@@ -54,6 +54,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Campaign
         /// Indica se a campanha está ativa na origem.
         /// </summary>
         [BsonElement("IsActive")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsActive { get; set; }
 
         /// <summary>
@@ -80,12 +81,14 @@ namespace Campaign.Watch.Domain.Entities.Read.Campaign
         /// Indica se a campanha foi marcada como deletada na origem.
         /// </summary>
         [BsonElement("IsDeleted")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsDeleted { get; set; }
 
         /// <summary>
         /// Indica se a campanha foi restaurada após a exclusão na origem.
         /// </summary>
         [BsonElement("IsRestored")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsRestored { get; set; }
 
         /// <summary>
@@ -130,11 +133,15 @@ namespace Campaign.Watch.Domain.Entities.Read.Campaign
         /// <summary>
         /// Indica se o agendamento é recorrente.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsRecurrent { get; set; }
 
         /// <summary>
         /// Indica se o agendamento está pausado.
         /// </summary>
+        /// 
+        [BsonRepresentation(BsonType.Boolean)]
         public bool IsPaused { get; set; }
     }
 

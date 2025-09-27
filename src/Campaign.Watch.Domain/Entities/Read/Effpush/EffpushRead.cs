@@ -66,6 +66,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effpush
         /// Indica se o webhook está habilitado para este gatilho.
         /// </summary>
         [BsonElement("WebhookEnabled")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool WebhookEnabled { get; set; }
 
         /// <summary>
@@ -200,6 +201,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effpush
         /// Indica se o processamento do arquivo foi concluído.
         /// </summary>
         [BsonElement("Completed")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool Completed { get; set; }
 
         /// <summary>

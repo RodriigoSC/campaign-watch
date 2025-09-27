@@ -7,18 +7,27 @@ using Campaign.Watch.Domain.Entities.Read.Effpush;
 using Campaign.Watch.Domain.Entities.Read.Effsms;
 using Campaign.Watch.Domain.Entities.Read.Effwhatsapp;
 using Campaign.Watch.Domain.Enums;
+using Campaign.Watch.Domain.Extensions;
 using MongoDB.Bson;
-using System;
 
 namespace Campaign.Watch.Application.Mappers.Campaign
 {
     public class CampaignMapper : Profile
     {
         public CampaignMapper()
-        {
-            // === MAPEAMENTOS DE DOMÍNIO PARA DTO (IDA) ===
-            CreateMap<CampaignEntity, CampaignSummaryResponse>();
-            CreateMap<CampaignEntity, CampaignDetailResponse>();
+        {       
+            CreateMap<CampaignEntity, CampaignDetailResponse>()
+             .ForMember(dest => dest.CampaignType, opt => opt.MapFrom(src => src.CampaignType.GetDescription()))
+             .ForMember(dest => dest.MonitoringStatus, opt => opt.MapFrom(src => src.MonitoringStatus.GetDescription()))
+             .ForMember(dest => dest.StatusCampaign, opt => opt.MapFrom(src => src.StatusCampaign.GetDescription()));
+
+
+            CreateMap<CampaignEntity, CampaignStatusResponse>()
+             .ForMember(dest => dest.CampaignType, opt => opt.MapFrom(src => src.CampaignType.GetDescription()))
+             .ForMember(dest => dest.StatusCampaign, opt => opt.MapFrom(src => src.StatusCampaign.GetDescription()));
+
+
+
 
             CreateMap<MonitoringHealthStatus, MonitoringHealthStatusDto>();
             CreateMap<Scheduler, SchedulerResponse>();

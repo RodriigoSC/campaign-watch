@@ -174,6 +174,7 @@ namespace Campaign.Watch.Domain.Entities.Read.Effwhatsapp
         /// Indica se o processamento do arquivo foi concluído.
         /// </summary>
         [BsonElement("Completed")]
+        [BsonRepresentation(BsonType.Boolean)]
         public bool Completed { get; set; }
 
         /// <summary>
